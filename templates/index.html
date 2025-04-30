@@ -1,12 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Navios TECONT</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
     <style>
-        .hoje { background-color: #c8e6c9; }
-        .passado { background-color: #ffcdd2; }
+        .hoje {
+            background-color: #c8e6c9;
+        }
+
+        .passado {
+            background-color: #ffcdd2;
+        }
+
         #last-update {
             text-align: center;
             font-style: italic;
@@ -16,19 +23,54 @@
             border-radius: 5px;
             font-size: 18px;
         }
+
         .tipo-icon {
             display: flex;
             align-items: center;
             gap: 5px;
         }
+
         .tipo-icon img {
             width: 30px;
             height: 30px;
         }
+
+        .alerta-barra {
+            font-size: 1.2rem;
+            /* Aumenta o tamanho da fonte */
+            padding: 15px 20px;
+            /* Aumenta o espaço interno */
+            margin-bottom: 20px;
+            /* Espaço entre o alerta e o conteúdo seguinte */
+            border-radius: 8px;
+            /* Deixa as bordas mais arredondadas */
+        }
+
+        .alerta-barra.restrita {
+            background-color: #ffcccc;
+            /* vermelho suave */
+            color: #b71c1c;
+            border-left: 6px solid #e53935;
+        }
+
+        .alerta-barra.aberta {
+            background-color: #c8e6c9;
+            /* verde suave */
+            color: #1b5e20;
+            border-left: 6px solid #43a047;
+        }
     </style>
 </head>
+
 <body class="grey lighten-4">
     <div class="container">
+
+        {% if barra_info %}
+        <div class="alerta-barra {{ 'restrita' if barra_info.restrita else 'aberta' }}">
+            {{ barra_info.mensagem }}
+        </div>
+        {% endif %}
+
         <h3 class="center-align">Navios no TECONTPROLONG / TECONT1</h3>
         <div id="last-update">Última atualização: {{ ultima_atualizacao }}</div>
 
@@ -55,7 +97,7 @@
                     <td>
                         <div class="tipo-icon">
                             {% if navio.icone %}
-                                <img src="{{ url_for('static', filename=navio.icone) }}" alt="Ícone">
+                            <img src="{{ url_for('static', filename=navio.icone) }}" alt="Ícone">
                             {% endif %}
                             {{ navio.tipo_navio if navio.tipo_navio else '-' }}
                         </div>
@@ -71,4 +113,5 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </body>
+
 </html>
