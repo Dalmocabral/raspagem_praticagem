@@ -3,8 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Navios TECONT</title>
+    <title>NaviFlow</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
         .hoje {
             background-color: #c8e6c9;
@@ -59,6 +60,41 @@
             color: #1b5e20;
             border-left: 6px solid #43a047;
         }
+        @media screen and (max-width: 768px) {
+    table.responsive-table thead {
+        display: none;
+    }
+
+    table.responsive-table tbody tr {
+        display: block;
+        margin-bottom: 20px;
+        background: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        padding: 10px;
+    }
+
+    table.responsive-table tbody td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    table.responsive-table tbody td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #0288d1;
+        flex-basis: 40%;
+        text-align: left;
+    }
+
+    .tipo-icon {
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+}
+
     </style>
 </head>
 
@@ -71,7 +107,10 @@
         </div>
         {% endif %}
 
-        <h3 class="center-align">Navios no TECONTPROLONG / TECONT1</h3>
+        <h3 class="center-align">
+            NaviFlow
+            <span class="material-icons" style="font-size: 36px; vertical-align: middle;">directions_boat</span>
+          </h3>
         <div id="last-update">Última atualização: {{ ultima_atualizacao }}</div>
 
         <table class="highlight centered responsive-table z-depth-2">
@@ -90,11 +129,11 @@
             <tbody>
                 {% for navio in navios %}
                 <tr class="{{ navio.status }}">
-                    <td>{{ navio.data }}</td>
-                    <td>{{ navio.hora }}</td>
-                    <td>{{ navio.navio }}</td>
-                    <td>{{ navio.imo if navio.imo else '-' }}</td>
-                    <td>
+                    <td data-label="Data">{{ navio.data }}</td>
+                    <td data-label="Hora">{{ navio.hora }}</td>
+                    <td data-label="Navio">{{ navio.navio }}</td>
+                    <td data-label="IMO">{{ navio.imo if navio.imo else '-' }}</td>
+                    <td data-label="Tipo">
                         <div class="tipo-icon">
                             {% if navio.icone %}
                             <img src="{{ url_for('static', filename=navio.icone) }}" alt="Ícone">
@@ -102,10 +141,11 @@
                             {{ navio.tipo_navio if navio.tipo_navio else '-' }}
                         </div>
                     </td>
-                    <td>{{ navio.calado }}</td>
-                    <td>{{ navio.manobra }}</td>
-                    <td>{{ navio.beco }}</td>
+                    <td data-label="Calado">{{ navio.calado }}</td>
+                    <td data-label="Manobra">{{ navio.manobra }}</td>
+                    <td data-label="Beço">{{ navio.beco }}</td>
                 </tr>
+                
                 {% endfor %}
             </tbody>
         </table>
