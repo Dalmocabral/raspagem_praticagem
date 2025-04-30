@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Navios TECONT</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <style>
+        .hoje { background-color: #c8e6c9; }
+        .passado { background-color: #ffcdd2; }
+        #last-update {
+            text-align: center;
+            font-style: italic;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #e3f2fd;
+            border-radius: 5px;
+            font-size: 18px;
+        }
+        .tipo-icon {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .tipo-icon img {
+            width: 30px;
+            height: 30px;
+        }
+    </style>
+</head>
+<body class="grey lighten-4">
+    <div class="container">
+        <h3 class="center-align">Navios no TECONTPROLONG / TECONT1</h3>
+        <div id="last-update">Última atualização: {{ ultima_atualizacao }}</div>
+
+        <table class="highlight centered responsive-table z-depth-2">
+            <thead class="blue lighten-1 white-text">
+                <tr>
+                    <th>Data</th>
+                    <th>Hora</th>
+                    <th>Navio</th>
+                    <th>IMO</th>
+                    <th>Tipo</th>
+                    <th>Calado</th>
+                    <th>Manobra</th>
+                    <th>Beço</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for navio in navios %}
+                <tr class="{{ navio.status }}">
+                    <td>{{ navio.data }}</td>
+                    <td>{{ navio.hora }}</td>
+                    <td>{{ navio.navio }}</td>
+                    <td>{{ navio.imo if navio.imo else '-' }}</td>
+                    <td>
+                        <div class="tipo-icon">
+                            {% if navio.icone %}
+                                <img src="{{ url_for('static', filename=navio.icone) }}" alt="Ícone">
+                            {% endif %}
+                            {{ navio.tipo_navio if navio.tipo_navio else '-' }}
+                        </div>
+                    </td>
+                    <td>{{ navio.calado }}</td>
+                    <td>{{ navio.manobra }}</td>
+                    <td>{{ navio.beco }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string, jsonify
+from flask import Flask, render_template, jsonify
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -12,8 +12,7 @@ def get_navios():
     response = requests.get(URL)
     response.encoding = response.apparent_encoding
     soup = BeautifulSoup(response.text, 'lxml')
-    
-    # Extrair o conteúdo de HINTS_ITEMS
+
     script_tags = soup.find_all('script')
     hints_items = []
     for script in script_tags:
@@ -54,20 +53,16 @@ def get_navios():
                     elif navio_date < hoje:
                         status = 'passado'
 
-                    # Buscar dados adicionais no hints_items
                     imo = None
                     tipo_navio = None
 
                     for hint in hints_items:
                         if navio_nome.upper() in hint.upper():
                             hint_text = BeautifulSoup(hint, 'html.parser').get_text(separator=' ').upper()
-
-                            # Pega o IMO a partir de "NOME"
                             match_imo = re.search(r'\bNOME\b\s*(\d+)', hint_text)
                             if match_imo:
                                 imo = match_imo.group(1)
 
-                            # Pega o tipo de navio ignorando país e parando no GT
                             match_tipo = re.search(
                                 r'TIPO DE NAVIO\s+([A-Z ,\'\.\-\(\)]+?)\s+(?:GT|DWT|LOA|BOCA)',
                                 hint_text
@@ -75,14 +70,13 @@ def get_navios():
                             if match_tipo:
                                 bruto = match_tipo.group(1).strip()
                                 palavras = bruto.split()
-                                
-                                # Lista com possíveis tipos conhecidos
+
                                 tipos_conhecidos = [
                                     'CONTAINER SHIP', 'GENERAL CARGO SHIP', 'OFFSHORE SHIP', 'TANKER',
                                     'RO-RO SHIP', 'BULK CARRIER', 'CRUISE SHIP', 'LNG CARRIER',
                                     'OIL TANKER', 'CHEMICAL TANKER', 'CARGO SHIP'
                                 ]
-                                
+
                                 tipo_navio = None
                                 for tipo in tipos_conhecidos:
                                     if tipo in bruto:
@@ -90,10 +84,17 @@ def get_navios():
                                         break
 
                                 if not tipo_navio:
-                                    # fallback: pega as últimas duas palavras (ex: "SHIP TANKER")
                                     tipo_navio = ' '.join(palavras[-2:])
 
-
+                    # Define o caminho do ícone com base no tipo
+                    if tipo_navio == 'CONTAINER SHIP':
+                        icone = 'icons/icon_container.png'
+                    elif 'TANKER' in (tipo_navio or ''):
+                        icone = 'icons/icon_tanker.png'
+                    elif 'OFFSHORE' in (tipo_navio or ''):
+                        icone = 'icons/icon_offshore.png'
+                    else:
+                        icone = None
 
                     navios.append({
                         'data': data,
@@ -104,7 +105,8 @@ def get_navios():
                         'beco': becos,
                         'status': status,
                         'imo': imo,
-                        'tipo_navio': tipo_navio
+                        'tipo_navio': tipo_navio,
+                        'icone': icone
                     })
 
                 except Exception as e:
@@ -117,69 +119,7 @@ def get_navios():
 def home():
     navios = get_navios()
     ultima_atualizacao = datetime.now().strftime('%d/%m/%Y %H:%M')
-
-    html = """
-    <!DOCTYPE html>
-    <html lang="pt-br">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Navios TECONT</title>
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-        <style>
-            .hoje { background-color: #c8e6c9; }    
-            .passado { background-color: #ffcdd2; }
-            #last-update {
-                text-align: center;
-                font-style: italic;
-                margin: 20px 0;
-                padding: 10px;
-                background-color: #e3f2fd;
-                border-radius: 5px;
-                font-size: 18px;
-            }
-        </style>
-    </head>
-    <body class="grey lighten-4">
-        <div class="container">
-            <h3 class="center-align">Navios no TECONTPROLONG / TECONT1</h3>
-            <div id="last-update">Última atualização: {{ ultima_atualizacao }}</div>
-
-            <table class="highlight centered responsive-table z-depth-2">
-                <thead class="blue lighten-1 white-text">
-                    <tr>
-                        <th>Data</th>
-                        <th>Hora</th>
-                        <th>Navio</th>
-                        <th>IMO</th>
-                        <th>Tipo</th>
-                        <th>Calado</th>
-                        <th>Manobra</th>
-                        <th>Beço</th>
-                    </tr>
-                </thead>
-                <tbody id="navios-body">
-                    {% for navio in navios %}
-                    <tr class="{{ navio.status }}">
-                        <td>{{ navio.data }}</td>
-                        <td>{{ navio.hora }}</td>
-                        <td>{{ navio.navio }}</td>
-                        <td>{{ navio.imo if navio.imo else '-' }}</td>
-                        <td>{{ navio.tipo_navio if navio.tipo_navio else '-' }}</td>
-                        <td>{{ navio.calado }}</td>
-                        <td>{{ navio.manobra }}</td>
-                        <td>{{ navio.beco }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    </body>
-    </html>
-    """
-    return render_template_string(html, navios=navios, ultima_atualizacao=ultima_atualizacao)
+    return render_template('index.html', navios=navios, ultima_atualizacao=ultima_atualizacao)
 
 @app.route('/api/navios')
 def api_navios():
