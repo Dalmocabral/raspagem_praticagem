@@ -22,7 +22,7 @@
 > Exibição clara e responsiva para web e dispositivos móveis.
 
 <p align="center">
-  <img src="caminho/para/sua/imagem-de-exemplo.png" alt="Exemplo da Interface NaviFlow" width="700">
+  <img src="https://i.ibb.co/Zprm8qXP/Captura-de-tela-2025-04-30-185618.png" alt="Exemplo da Interface NaviFlow" width="700">
 </p>
 
 ---
