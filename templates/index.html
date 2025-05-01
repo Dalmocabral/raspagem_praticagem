@@ -60,41 +60,41 @@
             color: #1b5e20;
             border-left: 6px solid #43a047;
         }
+
         @media screen and (max-width: 768px) {
-    table.responsive-table thead {
-        display: none;
-    }
+            table.responsive-table thead {
+                display: none;
+            }
 
-    table.responsive-table tbody tr {
-        display: block;
-        margin-bottom: 20px;
-        background: #fff;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        border-radius: 10px;
-        padding: 10px;
-    }
+            table.responsive-table tbody tr {
+                display: block;
+                margin-bottom: 20px;
+                background: #fff;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                border-radius: 10px;
+                padding: 10px;
+            }
 
-    table.responsive-table tbody td {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px;
-        border-bottom: 1px solid #e0e0e0;
-    }
+            table.responsive-table tbody td {
+                display: flex;
+                justify-content: space-between;
+                padding: 8px;
+                border-bottom: 1px solid #e0e0e0;
+            }
 
-    table.responsive-table tbody td::before {
-        content: attr(data-label);
-        font-weight: bold;
-        color: #0288d1;
-        flex-basis: 40%;
-        text-align: left;
-    }
+            table.responsive-table tbody td::before {
+                content: attr(data-label);
+                font-weight: bold;
+                color: #0288d1;
+                flex-basis: 40%;
+                text-align: left;
+            }
 
-    .tipo-icon {
-        flex-direction: row;
-        justify-content: flex-end;
-    }
-}
-
+            .tipo-icon {
+                flex-direction: row;
+                justify-content: flex-end;
+            }
+        }
     </style>
 </head>
 
@@ -110,48 +110,88 @@
         <h3 class="center-align">
             NaviFlow
             <span class="material-icons" style="font-size: 36px; vertical-align: middle;">directions_boat</span>
-          </h3>
+        </h3>
         <div id="last-update">Última atualização: {{ ultima_atualizacao }}</div>
+        <div id="tabela-navios">
+            <table class="highlight centered responsive-table z-depth-2">
+                <thead class="blue lighten-1 white-text">
+                    <tr>
+                        <th>Data</th>
+                        <th>Hora</th>
+                        <th>Navio</th>
+                        <th>IMO</th>
+                        <th>Tipo</th>
+                        <th>Calado</th>
+                        <th>Manobra</th>
+                        <th>Beço</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for navio in navios %}
+                    <tr class="{{ navio.status }}">
+                        <td data-label="Data">{{ navio.data }}</td>
+                        <td data-label="Hora">{{ navio.hora }}</td>
+                        <td data-label="Navio">{{ navio.navio }}</td>
+                        <td data-label="IMO">{{ navio.imo if navio.imo else '-' }}</td>
+                        <td data-label="Tipo">
+                            <div class="tipo-icon">
+                                {% if navio.icone %}
+                                <img src="{{ navio.icone }}" alt="Ícone" width="24" height="24">
+                                {% endif %}
+                                {{ navio.tipo_navio if navio.tipo_navio else '-' }}
+                            </div>
+                        </td>
+                        <td data-label="Calado">{{ navio.calado }}</td>
+                        <td data-label="Manobra">{{ navio.manobra }}</td>
+                        <td data-label="Beço">{{ navio.beco }}</td>
+                    </tr>
 
-        <table class="highlight centered responsive-table z-depth-2">
-            <thead class="blue lighten-1 white-text">
-                <tr>
-                    <th>Data</th>
-                    <th>Hora</th>
-                    <th>Navio</th>
-                    <th>IMO</th>
-                    <th>Tipo</th>
-                    <th>Calado</th>
-                    <th>Manobra</th>
-                    <th>Beço</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for navio in navios %}
-                <tr class="{{ navio.status }}">
-                    <td data-label="Data">{{ navio.data }}</td>
-                    <td data-label="Hora">{{ navio.hora }}</td>
-                    <td data-label="Navio">{{ navio.navio }}</td>
-                    <td data-label="IMO">{{ navio.imo if navio.imo else '-' }}</td>
-                    <td data-label="Tipo">
-                        <div class="tipo-icon">
-                            {% if navio.icone %}
-                            <img src="{{ url_for('static', filename=navio.icone) }}" alt="Ícone">
-                            {% endif %}
-                            {{ navio.tipo_navio if navio.tipo_navio else '-' }}
-                        </div>
-                    </td>
-                    <td data-label="Calado">{{ navio.calado }}</td>
-                    <td data-label="Manobra">{{ navio.manobra }}</td>
-                    <td data-label="Beço">{{ navio.beco }}</td>
-                </tr>
-                
-                {% endfor %}
-            </tbody>
-        </table>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        function atualizarTabela() {
+            fetch('/api/navios')
+                .then(response => response.json())
+                .then(data => {
+                    const tabela = document.querySelector('#tabela-navios tbody');
+                    tabela.innerHTML = '';  // limpa a tabela
+
+                    data.navios.forEach(navio => {
+                        const row = document.createElement('tr');
+                        row.className = navio.status;
+
+                        row.innerHTML = `
+    <td>${navio.data}</td>
+    <td>${navio.hora}</td>
+    <td>${navio.navio}</td>
+    <td>${navio.imo ? navio.imo : '-'}</td>
+    <td class="tipo-icon">
+        ${navio.icone ? `<img src="${navio.icone}" alt="Ícone">` : ''}
+        ${navio.tipo_navio || '-'}
+    </td>
+    <td>${navio.calado}</td>
+    <td>${navio.manobra}</td>
+    <td>${navio.beco}</td>
+`;
+                        tabela.appendChild(row);
+                    });
+
+                    document.getElementById('last-update').innerText = `Última atualização: ${data.ultima_atualizacao}`;
+                })
+                .catch(err => {
+                    console.error('Erro ao atualizar dados:', err);
+                });
+        }
+
+        // Atualiza a cada 60 segundos
+        setInterval(atualizarTabela, 600000);
+    </script>
+
 </body>
 
 </html>

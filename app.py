@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, url_for
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -97,7 +97,7 @@ def get_navios():
 
                     # Tenta encontrar informações adicionais (IMO e tipo) usando o bloco hints_items
                     imo = None
-                    tipo_navio = None
+                    tipo_navio = 'SEM INFORMAÇÕES'
                     for hint in hints_items:
                         if navio_nome.upper() in hint.upper():
                             hint_text = BeautifulSoup(hint, 'html.parser').get_text(separator=' ').upper()
@@ -117,11 +117,11 @@ def get_navios():
                                 palavras = bruto.split()
 
                                 tipos_conhecidos = [
-                                    'CONTAINER SHIP', 'GENERAL CARGO SHIP', 'OFFSHORE SHIP', 'TANKER',
-                                    'RO-RO SHIP', 'BULK CARRIER', 'CRUISE SHIP', 'LNG CARRIER',
-                                    'OIL TANKER', 'CHEMICAL TANKER', 'CARGO SHIP'
-                                ]
-
+                                        'CONTAINER SHIP', 'GENERAL CARGO SHIP (OPEN HATCH)', 'OFFSHORE SHIP',
+                                        'BULK CARRIER', 'CHEMICAL TANKER', 'CARGO SHIP',
+                                        'CHEMICAL/PRODUCTS TANKER', 'OFFSHORE SUPPORT VESSEL',
+                                        'PRODUCT TANKER'
+                                    ]
                                 tipo_navio = None
                                 for tipo in tipos_conhecidos:
                                     if tipo in bruto:
@@ -133,13 +133,13 @@ def get_navios():
 
                     # Define ícone baseado no tipo do navio
                     if tipo_navio == 'CONTAINER SHIP':
-                        icone = 'icons/icon_container.png'
+                        icone = 'https://i.ibb.co/cX1DXDhW/icon-container.png'
                     elif 'TANKER' in (tipo_navio or ''):
-                        icone = 'icons/icon_tanker.png'
+                        icone = 'https://i.ibb.co/cX1DXDhW/icon-container.png'
                     elif 'OFFSHORE' in (tipo_navio or ''):
-                        icone = 'icons/icon_offshore.png'
+                        icone = 'https://i.ibb.co/ymWQg66b/offshoer.png'
                     else:
-                        icone = None
+                        icone = 'https://i.ibb.co/cX1DXDhW/icon-container.png'
 
                     # Adiciona o navio à lista final
                     navios.append({
@@ -179,8 +179,11 @@ def home():
 @app.route('/api/navios')
 def api_navios():
     navios = get_navios()
-    return jsonify({'navios': navios})
-
+    ultima_atualizacao = datetime.now().strftime('%d/%m/%Y %H:%M')
+    return jsonify({
+        'navios': navios,
+        'ultima_atualizacao': ultima_atualizacao
+    })
 # Ponto de entrada da aplicação
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    app.run(debug=True)
