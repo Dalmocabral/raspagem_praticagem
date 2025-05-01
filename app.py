@@ -3,7 +3,9 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 import re
+import os
 
+port = int(os.environ.get('PORT', 5000))
 # Inicializa o aplicativo Flask
 app = Flask(__name__)
 
@@ -186,4 +188,4 @@ def api_navios():
     })
 # Ponto de entrada da aplicação
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', port=port)
