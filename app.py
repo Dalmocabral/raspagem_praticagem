@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import re
 import os
+from pytz import timezone
 
 port = int(os.environ.get('PORT', 5000))
 # Inicializa o aplicativo Flask
@@ -167,9 +168,13 @@ def get_navios():
 # Rota principal da aplicação, renderiza o template HTML com os dados obtidos
 @app.route('/')
 def home():
+    tz = timezone('America/Sao_Paulo')  # Fuso horário de Brasília
+    agora = datetime.now(tz)
+    ultima_atualizacao = agora.strftime('%d/%m/%Y %H:%M')
+
     navios = get_navios()
     barra_info = get_status_barra()
-    ultima_atualizacao = datetime.now().strftime('%d/%m/%Y %H:%M')
+    
     return render_template(
         'index.html',
         navios=navios,
@@ -180,8 +185,12 @@ def home():
 # Rota da API para retornar os dados em formato JSON (útil para outras aplicações)
 @app.route('/api/navios')
 def api_navios():
+    tz = timezone('America/Sao_Paulo')
+    agora = datetime.now(tz)
+    ultima_atualizacao = agora.strftime('%d/%m/%Y %H:%M')
+
     navios = get_navios()
-    ultima_atualizacao = datetime.now().strftime('%d/%m/%Y %H:%M')
+    
     return jsonify({
         'navios': navios,
         'ultima_atualizacao': ultima_atualizacao
