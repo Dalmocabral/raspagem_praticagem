@@ -1,0 +1,120 @@
+
+.hoje {
+    background-color: #c8e6c9;
+}
+
+.passado {
+    background-color: #ffcdd2;
+}
+
+#last-update {
+    text-align: center;
+    font-style: italic;
+    margin: 20px 0;
+    padding: 10px;
+    background-color: #e3f2fd;
+    border-radius: 5px;
+    font-size: 18px;
+}
+
+.tipo-icon {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.tipo-icon img {
+    width: 30px;
+    height: 30px;
+}
+
+.alerta-barra {
+    font-size: 1.2rem;
+    /* Aumenta o tamanho da fonte */
+    padding: 15px 20px;
+    /* Aumenta o espaço interno */
+    margin-bottom: 20px;
+    /* Espaço entre o alerta e o conteúdo seguinte */
+    border-radius: 8px;
+    /* Deixa as bordas mais arredondadas */
+}
+
+.alerta-barra.restrita {
+    background-color: #ffcccc;
+    /* vermelho suave */
+    color: #b71c1c;
+    border-left: 6px solid #e53935;
+}
+
+.alerta-barra.aberta {
+    background-color: #c8e6c9;
+    /* verde suave */
+    color: #1b5e20;
+    border-left: 6px solid #43a047;
+}
+
+@media screen and (max-width: 768px) {
+    table.responsive-table thead {
+        display: none;
+    }
+
+    table.responsive-table tbody tr {
+        display: block;
+        margin-bottom: 20px;
+        background: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        padding: 10px;
+    }
+
+    table.responsive-table tbody td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    table.responsive-table tbody td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #0288d1;
+        flex-basis: 40%;
+        text-align: left;
+    }
+
+    .tipo-icon {
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+}
+
+.blink-circle {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+    animation: blink 1s infinite;
+}
+
+.blink-green {
+    background-color: green;
+}
+
+.blink-red {
+    background-color: red;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.1;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}

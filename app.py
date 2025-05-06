@@ -5,6 +5,8 @@ from datetime import datetime
 import re
 import os
 from pytz import timezone
+from datetime import timedelta
+
 
 port = int(os.environ.get('PORT', 5000))
 # Inicializa o aplicativo Flask
@@ -98,9 +100,19 @@ def get_navios():
                     elif navio_date < hoje:
                         status = 'passado'
 
+                    # Após calcular navio_date e status
+                    alerta = None
+                    agora = datetime.now()
+                   
+                    if manobra == 'ENTRADA' and navio_date - timedelta(hours=1) <= agora < navio_date:
+                        alerta = 'entrada_futura'
+                    elif manobra in ['SAÍDA', 'MUDANÇA'] and navio_date - timedelta(hours=1) < agora:
+                        alerta = 'saida_atrasada'
+
+                   
                     # Tenta encontrar informações adicionais (IMO e tipo) usando o bloco hints_items
                     imo = None
-                    tipo_navio = 'SEM INFORMAÇÕES'
+                    tipo_navio = 'CHEMICAL TANKER'
                     for hint in hints_items:
                         if navio_nome.upper() in hint.upper():
                             hint_text = BeautifulSoup(hint, 'html.parser').get_text(separator=' ').upper()
@@ -123,7 +135,7 @@ def get_navios():
                                         'CONTAINER SHIP', 'GENERAL CARGO SHIP (OPEN HATCH)', 'OFFSHORE SHIP',
                                         'BULK CARRIER', 'CHEMICAL TANKER', 'CARGO SHIP',
                                         'CHEMICAL/PRODUCTS TANKER', 'OFFSHORE SUPPORT VESSEL',
-                                        'PRODUCT TANKER'
+                                        'PRODUCT TANKER', 'TANKER', 'CHEMICAL'
                                     ]
                                 tipo_navio = None
                                 for tipo in tipos_conhecidos:
@@ -137,12 +149,14 @@ def get_navios():
                     # Define ícone baseado no tipo do navio
                     if tipo_navio == 'CONTAINER SHIP':
                         icone = 'https://i.ibb.co/cX1DXDhW/icon-container.png'
-                    elif 'TANKER' in (tipo_navio or ''):
-                        icone = 'https://i.ibb.co/cX1DXDhW/icon-container.png'
+                    elif 'CHEMICAL TANKER' in (tipo_navio or ''):
+                        icone = 'https://i.ibb.co/T315cM3/TANKER.png'
                     elif 'OFFSHORE' in (tipo_navio or ''):
                         icone = 'https://i.ibb.co/ymWQg66b/offshoer.png'
                     else:
                         icone = 'https://i.ibb.co/cX1DXDhW/icon-container.png'
+
+                    
 
                     # Adiciona o navio à lista final
                     navios.append({
@@ -155,7 +169,8 @@ def get_navios():
                         'status': status,
                         'imo': imo,
                         'tipo_navio': tipo_navio,
-                        'icone': icone
+                        'icone': icone,
+                        'alerta': alerta
                     })
 
                 except Exception as e:
@@ -163,7 +178,17 @@ def get_navios():
                     print(f"Erro ao processar linha: {e}")
                     continue
 
-    return navios
+    # Eliminar duplicatas com base em data, hora, nome e manobra
+    navios_unicos = []
+    vistos = set()
+
+    for n in navios:
+        chave = (n['data'], n['hora'], n['navio'], n['manobra'])
+        if chave not in vistos:
+            navios_unicos.append(n)
+            vistos.add(chave)
+
+    return navios_unicos
 
 # Rota principal da aplicação, renderiza o template HTML com os dados obtidos
 @app.route('/')
@@ -176,7 +201,7 @@ def home():
     barra_info = get_status_barra()
     
     return render_template(
-        'index.html',
+        'index2.html',
         navios=navios,
         ultima_atualizacao=ultima_atualizacao,
         barra_info=barra_info
@@ -197,4 +222,4 @@ def api_navios():
     })
 # Ponto de entrada da aplicação
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, debug=True)
