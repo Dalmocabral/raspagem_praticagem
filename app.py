@@ -104,8 +104,11 @@ def get_navios():
                     alerta = None
                     agora = datetime.now()
                    
-                    if manobra == 'ENTRADA' and navio_date - timedelta(hours=1) <= agora < navio_date:
-                        alerta = 'entrada_futura'
+                    if manobra == 'ENTRADA':
+                        if navio_date - timedelta(hours=1) <= agora < navio_date:
+                            alerta = 'entrada_antecipada'  # 🟠 laranja
+                        elif agora >= navio_date:
+                            alerta = 'entrada_futura'      # 🟢 verde
                     elif manobra in ['SAÍDA', 'MUDANÇA'] and navio_date - timedelta(hours=1) < agora:
                         alerta = 'saida_atrasada'
 
@@ -151,7 +154,7 @@ def get_navios():
                         icone = 'https://i.ibb.co/cX1DXDhW/icon-container.png'
                     elif 'CHEMICAL TANKER' in (tipo_navio or ''):
                         icone = 'https://i.ibb.co/T315cM3/TANKER.png'
-                    elif 'OFFSHORE' in (tipo_navio or ''):
+                    elif 'CARGO SHIP' in (tipo_navio or ''):
                         icone = 'https://i.ibb.co/ymWQg66b/offshoer.png'
                     else:
                         icone = 'https://i.ibb.co/cX1DXDhW/icon-container.png'
@@ -215,10 +218,12 @@ def api_navios():
     ultima_atualizacao = agora.strftime('%d/%m/%Y %H:%M')
 
     navios = get_navios()
-    
+    barra_info = get_status_barra()
+
     return jsonify({
         'navios': navios,
-        'ultima_atualizacao': ultima_atualizacao
+        'ultima_atualizacao': ultima_atualizacao,
+        'barra_info': barra_info
     })
 # Ponto de entrada da aplicação
 if __name__ == '__main__':

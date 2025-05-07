@@ -82,7 +82,6 @@
       height: 10px;
       border-radius: 50%;
       display: inline-block;
-      margin-right: 5px;
       animation: blink 1s infinite;
     }
 
@@ -90,6 +89,15 @@
       background-color: green;
     }
 
+    .blink-orange {
+      background-color: orange;
+    }
+
+    .blink-yellow {
+      background-color: gold;
+    }
+
+    /* opcional para saída futura */
     .blink-red {
       background-color: red;
     }
@@ -146,7 +154,9 @@
           <tr class="{{ navio.status }}">
             <td>{{ navio.data }}</td>
             <td>
-              {% if navio.alerta == 'entrada_futura' %}
+              {% if navio.alerta == 'entrada_antecipada' %}
+              <span class="blink-circle blink-orange"></span>
+              {% elif navio.alerta == 'entrada_futura' %}
               <span class="blink-circle blink-green"></span>
               {% elif navio.alerta == 'saida_atrasada' %}
               <span class="blink-circle blink-red"></span>
@@ -167,7 +177,7 @@
             <td>
               {% if navio.manobra == "ENTRADA" %}
               <span class="badge rounded-pill text-bg-success">{{ navio.manobra }}</span>
-                {% elif navio.manobra in ["SAÍDA", "MUDANÇA"] %}
+              {% elif navio.manobra in ["SAÍDA", "MUDANÇA"] %}
               <span class="badge rounded-pill text-bg-danger">{{ navio.manobra }}</span>
               {% else %}
               {{ navio.manobra }}
@@ -274,28 +284,52 @@
             const row = document.createElement('tr');
             row.className = navio.status;
 
+            let alertaHTML = '';
+            if (navio.alerta === 'entrada_antecipada') {
+              alertaHTML = '<span class="blink-circle blink-orange"></span>';
+            } else if (navio.alerta === 'entrada_futura') {
+              alertaHTML = '<span class="blink-circle blink-green"></span>';
+            } else if (navio.alerta === 'saida_atrasada') {
+              alertaHTML = '<span class="blink-circle blink-red"></span>';
+            }
+
             row.innerHTML = `
-                <td>${navio.data}</td>
-                <td>${navio.hora}</td>
-                <td>${navio.navio}</td>
-                <td>${navio.imo || '-'}</td>
-                <td class="tipo-icon">
-                  ${navio.icone ? `<img src="${navio.icone}" alt="Ícone" width="30" height="30">` : ''}
-                  ${navio.tipo_navio || '-'}
-                </td>
-                <td>${navio.calado}</td>
-                <td>${navio.manobra}</td>
-                <td>${navio.beco}</td>
-              `;
+          <td>${navio.data}</td>
+          <td>${alertaHTML} ${navio.hora}</td>
+          <td>${navio.navio}</td>
+          <td>${navio.imo || '-'}</td>
+          <td class="tipo-icon">
+            ${navio.icone ? `<img src="${navio.icone}" alt="Ícone" width="30" height="30">` : ''}
+            ${navio.tipo_navio || '-'}
+          </td>
+          <td>${navio.calado}</td>
+          <td>
+            ${navio.manobra === "ENTRADA"
+                ? '<span class="badge rounded-pill text-bg-success">ENTRADA</span>'
+                : navio.manobra === "SAÍDA" || navio.manobra === "MUDANÇA"
+                  ? '<span class="badge rounded-pill text-bg-danger">' + navio.manobra + '</span>'
+                  : navio.manobra}
+          </td>
+          <td>${navio.beco}</td>
+        `;
             tabela.appendChild(row);
           });
 
           document.getElementById('last-update').innerText = `Última atualização: ${data.ultima_atualizacao}`;
+
+          // Atualizar alerta da barra
+          const alertaBarra = document.querySelector('.alerta-barra');
+          if (alertaBarra) {
+            alertaBarra.classList.remove('restrita', 'aberta');
+            alertaBarra.classList.add(data.barra_info.restrita ? 'restrita' : 'aberta');
+            alertaBarra.innerHTML = `<i class="fas fa-info-circle me-2"></i> ${data.barra_info.mensagem}`;
+          }
         })
         .catch(err => {
           console.error('Erro ao atualizar dados:', err);
         });
     }
+
 
     setInterval(atualizarTabela, 600000); // 10 minutos
   </script>
