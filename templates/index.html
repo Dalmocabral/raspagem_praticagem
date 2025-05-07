@@ -1,197 +1,341 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
 
 <head>
-    <meta charset="UTF-8">
-    <title>NaviFlow</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <style>
-        .hoje {
-            background-color: #c8e6c9;
-        }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NaviFlow</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-        .passado {
-            background-color: #ffcdd2;
-        }
+  <style>
+    .tipo-icon {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
 
-        #last-update {
-            text-align: center;
-            font-style: italic;
-            margin: 20px 0;
-            padding: 10px;
-            background-color: #e3f2fd;
-            border-radius: 5px;
-            font-size: 18px;
-        }
+    .tipo-icon img {
+      width: 30px;
+      height: 30px;
+    }
 
-        .tipo-icon {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
+    #last-update {
+      text-align: center;
+      font-style: italic;
+      margin: 20px 0;
+      padding: 10px;
+      background-color: #e3f2fd;
+      border-radius: 5px;
+      font-size: 18px;
+    }
 
-        .tipo-icon img {
-            width: 30px;
-            height: 30px;
-        }
+    /* Estilo para os cabeçalhos com filtro */
+    .sortable {
+      cursor: pointer;
+      position: relative;
+      padding-right: 25px !important;
+    }
 
-        .alerta-barra {
-            font-size: 1.2rem;
-            /* Aumenta o tamanho da fonte */
-            padding: 15px 20px;
-            /* Aumenta o espaço interno */
-            margin-bottom: 20px;
-            /* Espaço entre o alerta e o conteúdo seguinte */
-            border-radius: 8px;
-            /* Deixa as bordas mais arredondadas */
-        }
+    .sortable::after {
+      content: "↕";
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
 
-        .alerta-barra.restrita {
-            background-color: #ffcccc;
-            /* vermelho suave */
-            color: #b71c1c;
-            border-left: 6px solid #e53935;
-        }
+    .sortable.asc::after {
+      content: "↑";
+      opacity: 1;
+      color: #0d6efd;
+    }
 
-        .alerta-barra.aberta {
-            background-color: #c8e6c9;
-            /* verde suave */
-            color: #1b5e20;
-            border-left: 6px solid #43a047;
-        }
+    .sortable.desc::after {
+      content: "↓";
+      opacity: 1;
+      color: #0d6efd;
+    }
 
-        @media screen and (max-width: 768px) {
-            table.responsive-table thead {
-                display: none;
-            }
+    .sortable:hover::after {
+      opacity: 0.8;
+    }
 
-            table.responsive-table tbody tr {
-                display: block;
-                margin-bottom: 20px;
-                background: #fff;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-                border-radius: 10px;
-                padding: 10px;
-            }
+    /* Melhorias na tabela */
+    .table-hover tbody tr:hover {
+      background-color: rgba(13, 110, 253, 0.05) !important;
+    }
 
-            table.responsive-table tbody td {
-                display: flex;
-                justify-content: space-between;
-                padding: 8px;
-                border-bottom: 1px solid #e0e0e0;
-            }
+    .alerta-barra.aberta {
+      background-color: #c8e6c9;
+      /* verde suave */
+      color: #1b5e20;
+      border-left: 6px solid #43a047;
+    }
 
-            table.responsive-table tbody td::before {
-                content: attr(data-label);
-                font-weight: bold;
-                color: #0288d1;
-                flex-basis: 40%;
-                text-align: left;
-            }
+    .blink-circle {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      animation: blink 1s infinite;
+    }
 
-            .tipo-icon {
-                flex-direction: row;
-                justify-content: flex-end;
-            }
-        }
-    </style>
+    .blink-green {
+      background-color: green;
+    }
+
+    .blink-orange {
+      background-color: orange;
+    }
+
+    .blink-yellow {
+      background-color: gold;
+    }
+
+    /* opcional para saída futura */
+    .blink-red {
+      background-color: red;
+    }
+
+    @keyframes blink {
+      0% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.1;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+  </style>
 </head>
 
-<body class="grey lighten-4">
-    <div class="container">
+<body>
+  <div class="container my-4">
 
-        {% if barra_info %}
-        <div class="alerta-barra {{ 'restrita' if barra_info.restrita else 'aberta' }}">
-            {{ barra_info.mensagem }}
-        </div>
-        {% endif %}
-
-        <h3 class="center-align">
-            NaviFlow
-            <span class="material-icons" style="font-size: 36px; vertical-align: middle;">directions_boat</span>
-        </h3>
-        <div id="last-update">Última atualização: {{ ultima_atualizacao }}</div>
-        <div id="tabela-navios">
-            <table class="highlight centered responsive-table z-depth-2">
-                <thead class="blue lighten-1 white-text">
-                    <tr>
-                        <th>Data</th>
-                        <th>Hora</th>
-                        <th>Navio</th>
-                        <th>IMO</th>
-                        <th>Tipo</th>
-                        <th>Calado</th>
-                        <th>Manobra</th>
-                        <th>Beço</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for navio in navios %}
-                    <tr class="{{ navio.status }}">
-                        <td data-label="Data">{{ navio.data }}</td>
-                        <td data-label="Hora">{{ navio.hora }}</td>
-                        <td data-label="Navio">{{ navio.navio }}</td>
-                        <td data-label="IMO">{{ navio.imo if navio.imo else '-' }}</td>
-                        <td data-label="Tipo">
-                            <div class="tipo-icon">
-                                {% if navio.icone %}
-                                <img src="{{ navio.icone }}" alt="Ícone" width="24" height="24">
-                                {% endif %}
-                                {{ navio.tipo_navio if navio.tipo_navio else '-' }}
-                            </div>
-                        </td>
-                        <td data-label="Calado">{{ navio.calado }}</td>
-                        <td data-label="Manobra">{{ navio.manobra }}</td>
-                        <td data-label="Beço">{{ navio.beco }}</td>
-                    </tr>
-
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    {% if barra_info %}
+    <div class="alert alert-success alerta-barra text-center {{ 'restrita' if barra_info.restrita else 'aberta' }}">
+      <i class="fas fa-info-circle me-2"></i>
+      {{ barra_info.mensagem }}
     </div>
+    {% endif %}
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script>
-        function atualizarTabela() {
-            fetch('/api/navios')
-                .then(response => response.json())
-                .then(data => {
-                    const tabela = document.querySelector('#tabela-navios tbody');
-                    tabela.innerHTML = '';  // limpa a tabela
+    <h3 class="text-center mb-4">
+      NaviFlow
+      <span class="material-icons" style="font-size: 36px; vertical-align: middle;">directions_boat</span>
+    </h3>
 
-                    data.navios.forEach(navio => {
-                        const row = document.createElement('tr');
-                        row.className = navio.status;
+    <div id="last-update">Última atualização: {{ ultima_atualizacao }}</div>
 
-                        row.innerHTML = `
-    <td>${navio.data}</td>
-    <td>${navio.hora}</td>
-    <td>${navio.navio}</td>
-    <td>${navio.imo ? navio.imo : '-'}</td>
-    <td class="tipo-icon">
-        ${navio.icone ? `<img src="${navio.icone}" alt="Ícone">` : ''}
-        ${navio.tipo_navio || '-'}
-    </td>
-    <td>${navio.calado}</td>
-    <td>${navio.manobra}</td>
-    <td>${navio.beco}</td>
-`;
-                        tabela.appendChild(row);
-                    });
+    <div class="table-responsive">
+      <table class="table table-striped table-hover text-center align-middle" id="navios-table">
+        <thead class="table-primary">
+          <tr>
+            <th class="sortable" onclick="sortTable(0)">Data</th>
+            <th class="sortable" onclick="sortTable(1)">Hora</th>
+            <th class="sortable" onclick="sortTable(2)">Navio</th>
+            <th class="sortable" onclick="sortTable(3)">IMO</th>
+            <th class="sortable" onclick="sortTable(4)">Tipo</th>
+            <th class="sortable" onclick="sortTable(5)">Calado</th>
+            <th class="sortable" onclick="sortTable(6)">Manobra</th>
+            <th class="sortable" onclick="sortTable(7)">Beço</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for navio in navios %}
+          <tr class="{{ navio.status }}">
+            <td>{{ navio.data }}</td>
+            <td>
+              {% if navio.alerta == 'entrada_antecipada' %}
+              <span class="blink-circle blink-orange"></span>
+              {% elif navio.alerta == 'entrada_futura' %}
+              <span class="blink-circle blink-green"></span>
+              {% elif navio.alerta == 'saida_futura' %}
+              <span class="blink-circle blink-yellow"></span> {# Opcional #}
+              {% elif navio.alerta == 'saida_atrasada' %}
+              <span class="blink-circle blink-red"></span>
+              {% endif %}
 
-                    document.getElementById('last-update').innerText = `Última atualização: ${data.ultima_atualizacao}`;
-                })
-                .catch(err => {
-                    console.error('Erro ao atualizar dados:', err);
-                });
+              {{ navio.hora }}
+            </td>
+            <td>{{ navio.navio }}</td>
+            <td>{{ navio.imo if navio.imo else '-' }}</td>
+            <td>
+              <div class="tipo-icon">
+                {% if navio.icone %}
+                <img src="{{ navio.icone }}" alt="Ícone">
+                {% endif %}
+                {{ navio.tipo_navio if navio.tipo_navio else '-' }}
+              </div>
+            </td>
+            <td>{{ navio.calado }}</td>
+            <td>
+              {% if navio.manobra == "ENTRADA" %}
+              <span class="badge rounded-pill text-bg-success">{{ navio.manobra }}</span>
+              {% elif navio.manobra in ["SAÍDA", "MUDANÇA"] %}
+              <span class="badge rounded-pill text-bg-danger">{{ navio.manobra }}</span>
+              {% else %}
+              {{ navio.manobra }}
+              {% endif %}
+            </td>
+            <td>{{ navio.beco }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
+    crossorigin="anonymous"></script>
+  <script>
+    // Variável para controlar a direção da ordenação
+    let currentSort = {
+      column: null,
+      direction: 'asc' // 'asc' ou 'desc'
+    };
+
+    // Função para ordenar a tabela
+    function sortTable(columnIndex) {
+      const table = document.getElementById("navios-table");
+      const tbody = table.tBodies[0];
+      const rows = Array.from(tbody.querySelectorAll("tr"));
+      const headers = table.querySelectorAll("th.sortable");
+
+      // Remove classes de ordenação de todos os cabeçalhos
+      headers.forEach(header => {
+        header.classList.remove("asc", "desc");
+      });
+
+      // Se clicarmos na mesma coluna, invertemos a direção
+      if (currentSort.column === columnIndex) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        // Se for uma coluna diferente, ordenamos asc por padrão
+        currentSort.column = columnIndex;
+        currentSort.direction = 'asc';
+      }
+
+      // Adiciona classe ao cabeçalho atual
+      headers[columnIndex].classList.add(currentSort.direction);
+
+      rows.sort((a, b) => {
+        const aText = a.cells[columnIndex].textContent.trim();
+        const bText = b.cells[columnIndex].textContent.trim();
+
+        // Tratamento especial para datas (coluna 0)
+        if (columnIndex === 0) {
+          const [dayA, monthA, yearA] = aText.split('/');
+          const [dayB, monthB, yearB] = bText.split('/');
+          const dateA = new Date(`${yearA}-${monthA}-${dayA}`);
+          const dateB = new Date(`${yearB}-${monthB}-${dayB}`);
+
+          return currentSort.direction === 'asc'
+            ? dateA - dateB
+            : dateB - dateA;
         }
 
-        // Atualiza a cada 60 segundos
-        setInterval(atualizarTabela, 600000);
-    </script>
+        // Tratamento especial para horas (coluna 1)
+        if (columnIndex === 1) {
+          const [hoursA, minutesA] = aText.split(':').map(Number);
+          const [hoursB, minutesB] = bText.split(':').map(Number);
+          const totalMinutesA = hoursA * 60 + minutesA;
+          const totalMinutesB = hoursB * 60 + minutesB;
 
+          return currentSort.direction === 'asc'
+            ? totalMinutesA - totalMinutesB
+            : totalMinutesB - totalMinutesA;
+        }
+
+        // Tratamento especial para números (coluna 5 - Calado)
+        if (columnIndex === 5) {
+          const numA = parseFloat(aText.replace(',', '.'));
+          const numB = parseFloat(bText.replace(',', '.'));
+
+          return currentSort.direction === 'asc'
+            ? numA - numB
+            : numB - numA;
+        }
+
+        // Ordenação padrão para texto
+        return currentSort.direction === 'asc'
+          ? aText.localeCompare(bText, 'pt-BR', { sensitivity: 'base' })
+          : bText.localeCompare(aText, 'pt-BR', { sensitivity: 'base' });
+      });
+
+      // Reinsere as linhas ordenadas na tabela
+      rows.forEach(row => tbody.appendChild(row));
+    }
+
+    function atualizarTabela() {
+      fetch('/api/navios')
+        .then(response => response.json())
+        .then(data => {
+          const tabela = document.querySelector('#navios-table tbody');
+          tabela.innerHTML = '';
+
+          data.navios.forEach(navio => {
+            const row = document.createElement('tr');
+            row.className = navio.status;
+
+            let alertaHTML = '';
+            if (navio.alerta === 'entrada_antecipada') {
+              alertaHTML = '<span class="blink-circle blink-orange"></span>';
+            } else if (navio.alerta === 'entrada_futura') {
+              alertaHTML = '<span class="blink-circle blink-green"></span>';
+            } else if (navio.alerta === 'saida_atrasada') {
+              alertaHTML = '<span class="blink-circle blink-red"></span>';
+            }
+
+            row.innerHTML = `
+          <td>${navio.data}</td>
+          <td>${alertaHTML} ${navio.hora}</td>
+          <td>${navio.navio}</td>
+          <td>${navio.imo || '-'}</td>
+          <td class="tipo-icon">
+            ${navio.icone ? `<img src="${navio.icone}" alt="Ícone" width="30" height="30">` : ''}
+            ${navio.tipo_navio || '-'}
+          </td>
+          <td>${navio.calado}</td>
+          <td>
+            ${navio.manobra === "ENTRADA"
+                ? '<span class="badge rounded-pill text-bg-success">ENTRADA</span>'
+                : navio.manobra === "SAÍDA" || navio.manobra === "MUDANÇA"
+                  ? '<span class="badge rounded-pill text-bg-danger">' + navio.manobra + '</span>'
+                  : navio.manobra}
+          </td>
+          <td>${navio.beco}</td>
+        `;
+            tabela.appendChild(row);
+          });
+
+          document.getElementById('last-update').innerText = `Última atualização: ${data.ultima_atualizacao}`;
+
+          // Atualizar alerta da barra
+          const alertaBarra = document.querySelector('.alerta-barra');
+          if (alertaBarra) {
+            alertaBarra.classList.remove('restrita', 'aberta');
+            alertaBarra.classList.add(data.barra_info.restrita ? 'restrita' : 'aberta');
+            alertaBarra.innerHTML = `<i class="fas fa-info-circle me-2"></i> ${data.barra_info.mensagem}`;
+          }
+        })
+        .catch(err => {
+          console.error('Erro ao atualizar dados:', err);
+        });
+    }
+
+
+    setInterval(atualizarTabela, 600000); // 10 minutos
+  </script>
 </body>
 
 </html>

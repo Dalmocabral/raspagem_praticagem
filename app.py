@@ -106,11 +106,14 @@ def get_navios():
                    
                     if manobra == 'ENTRADA':
                         if navio_date - timedelta(hours=1) <= agora < navio_date:
-                            alerta = 'entrada_antecipada'  # 🟠 laranja
+                            alerta = 'entrada_antecipada'  # 🟠 laranja (1h antes)
                         elif agora >= navio_date:
-                            alerta = 'entrada_futura'      # 🟢 verde
-                    elif manobra in ['SAÍDA', 'MUDANÇA'] and navio_date - timedelta(hours=1) < agora:
-                        alerta = 'saida_atrasada'
+                            alerta = 'entrada_futura'      # 🟢 verde (chegou a hora)
+                    elif manobra in ['SAÍDA', 'MUDANÇA']:
+                        if navio_date - timedelta(hours=1) <= agora < navio_date:
+                            alerta = 'saida_futura'        # 🟡 opcional
+                        elif agora >= navio_date:
+                            alerta = 'saida_atrasada'      # 🔴 vermelho
 
                    
                     # Tenta encontrar informações adicionais (IMO e tipo) usando o bloco hints_items
@@ -204,7 +207,7 @@ def home():
     barra_info = get_status_barra()
     
     return render_template(
-        'index2.html',
+        'index.html',
         navios=navios,
         ultima_atualizacao=ultima_atualizacao,
         barra_info=barra_info
