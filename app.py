@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, url_for
+from flask import Flask, render_template, jsonify
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -105,14 +105,14 @@ def get_navios():
                     agora = datetime.now()
                    
                     if manobra == 'ENTRADA':
-                        if navio_date - timedelta(hours=1) <= agora < navio_date:
+                        if navio_date.date() - timedelta(hours=1) <= agora.date() < navio_date.date():
                             alerta = 'entrada_antecipada'  # 🟠 laranja (1h antes)
-                        elif agora >= navio_date:
+                        elif agora.date() >= navio_date.date():
                             alerta = 'entrada_futura'      # 🟢 verde (chegou a hora)
                     elif manobra in ['SAÍDA', 'MUDANÇA']:
-                        if navio_date - timedelta(hours=1) <= agora < navio_date:
+                        if navio_date.date() - timedelta(hours=1) <= agora.date() < navio_date.date():
                             alerta = 'saida_futura'        # 🟡 opcional
-                        elif agora >= navio_date:
+                        elif agora.date() >= navio_date.date():
                             alerta = 'saida_atrasada'      # 🔴 vermelho
 
                    
