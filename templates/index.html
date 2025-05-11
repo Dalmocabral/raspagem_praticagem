@@ -70,12 +70,17 @@
       background-color: rgba(13, 110, 253, 0.05) !important;
     }
 
-    .alerta-barra.aberta {
-      background-color: #c8e6c9;
-      /* verde suave */
-      color: #1b5e20;
-      border-left: 6px solid #43a047;
-    }
+  .alerta-barra.restrita {
+    background-color: #ffcdd2; /* vermelho suave */
+    color: #b71c1c;
+    border-left: 6px solid #f44336;
+}
+
+.alerta-barra.aberta {
+    background-color: #c8e6c9; /* verde suave */
+    color: #1b5e20;
+    border-left: 6px solid #43a047;
+}
 
     .blink-circle {
       width: 10px;
@@ -121,12 +126,12 @@
 <body>
   <div class="container my-4">
 
-    {% if barra_info %}
-    <div class="alert alert-success alerta-barra text-center {{ 'restrita' if barra_info.restrita else 'aberta' }}">
+   {% if barra_info %}
+    <div class="alert alerta-barra text-center {{ 'restrita' if barra_info.restrita else 'aberta' }}">
       <i class="fas fa-info-circle me-2"></i>
       {{ barra_info.mensagem }}
     </div>
-    {% endif %}
+{% endif %}
 
     <h3 class="text-center mb-4">
       NaviFlow
