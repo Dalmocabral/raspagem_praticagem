@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, url_for
+from flask import Flask, render_template, jsonify, url_for, request
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -49,7 +49,7 @@ def get_status_barra():
         'mensagem': 'Não foi possível obter o status da barra.'
     }
 
-def get_navios():
+def get_navios(terminal_filter='rio'):
     response = requests.get(URL)
     response.encoding = response.apparent_encoding
     soup = BeautifulSoup(response.text, 'lxml')
@@ -78,8 +78,12 @@ def get_navios():
                 becos = cols[8].get_text(strip=True) if cols[8].get_text(strip=True) else cols[11].get_text(strip=True)
 
                 # FILTRO ADICIONADO AQUI
-                if 'TECONTPROLONG' not in becos and 'TECONT1' not in becos:
-                    continue # Pula para a próxima linha se não corresponder ao filtro
+                if terminal_filter == 'rio':
+                    if 'TECONTPROLONG' not in becos and 'TECONT1' not in becos:
+                        continue # Pula para a próxima linha se não corresponder ao filtro Rio
+                elif terminal_filter == 'multi':
+                    if 'TECONT4' not in becos and 'TECONT2' not in becos and 'TECONT3' not in becos and 'TECONT5' not in becos:
+                        continue # Pula para a próxima linha se não corresponder ao filtro Multi
 
                 imo = None
                 tipo_navio = None
@@ -91,7 +95,6 @@ def get_navios():
 
                     tipo_navio_span = tooltip_escondida.find('span', id='DS_TIPO_NAVIO')
                     if tipo_navio_span:
-                        # LINHA ALTERADA AQUI PARA REMOVER O TEXTO ENTRE PARÊNTESES
                         tipo_navio = tipo_navio_span.get_text(strip=True).split('(')[0].strip()
 
                 data, hora = data_hora.split()
@@ -170,14 +173,16 @@ def home():
     agora = datetime.now(tz)
     ultima_atualizacao = agora.strftime('%d/%m/%Y %H:%M')
 
-    navios = get_navios()
+    # Por padrão, mostra os terminais do Rio
+    navios = get_navios('rio')
     barra_info = get_status_barra()
     
     return render_template(
         'index.html',
         navios=navios,
         ultima_atualizacao=ultima_atualizacao,
-        barra_info=barra_info
+        barra_info=barra_info,
+        terminal_selecionado='rio'
     )
 
 @app.route('/api/navios')
@@ -186,7 +191,9 @@ def api_navios():
     agora = datetime.now(tz)
     ultima_atualizacao = agora.strftime('%d/%m/%Y %H:%M')
 
-    navios = get_navios()
+    # Obtém o parâmetro de filtro da query string (default: 'rio')
+    terminal_filter = request.args.get('terminal', 'rio')
+    navios = get_navios(terminal_filter)
     barra_info = get_status_barra()
 
     return jsonify({

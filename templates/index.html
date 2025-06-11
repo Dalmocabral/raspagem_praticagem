@@ -1,374 +1,439 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>NaviFlow</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7"
-      crossorigin="anonymous"
-    />
-    <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet"
-    />
 
-    <style>
-      .tipo-icon {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-      }
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NaviFlow</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 
-      .tipo-icon img {
-        width: 30px;
-        height: 30px;
-      }
+  <style>
+    .tipo-icon {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
 
-      #last-update {
-        text-align: center;
-        font-style: italic;
-        margin: 20px 0;
-        padding: 10px;
-        background-color: #e3f2fd;
-        border-radius: 5px;
-        font-size: 18px;
-      }
+    .tipo-icon img {
+      width: 30px;
+      height: 30px;
+    }
 
-      /* Estilo para os cabeçalhos com filtro */
-      .sortable {
-        cursor: pointer;
-        position: relative;
-        padding-right: 25px !important;
-      }
+    #last-update {
+      text-align: center;
+      font-style: italic;
+      margin: 20px 0;
+      padding: 10px;
+      background-color: #e3f2fd;
+      border-radius: 5px;
+      font-size: 18px;
+    }
 
-      .sortable::after {
-        content: "↕";
-        position: absolute;
-        right: 8px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 14px;
-        opacity: 0.5;
-        transition: all 0.3s ease;
-      }
+    /* Estilo para os cabeçalhos com filtro */
+    .sortable {
+      cursor: pointer;
+      position: relative;
+      padding-right: 25px !important;
+    }
 
-      .sortable.asc::after {
-        content: "↑";
+    .sortable::after {
+      content: "↕";
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .sortable.asc::after {
+      content: "↑";
+      opacity: 1;
+      color: #0d6efd;
+    }
+
+    .sortable.desc::after {
+      content: "↓";
+      opacity: 1;
+      color: #0d6efd;
+    }
+
+    .sortable:hover::after {
+      opacity: 0.8;
+    }
+
+    /* Melhorias na tabela */
+    .table-hover tbody tr:hover {
+      background-color: rgba(13, 110, 253, 0.05) !important;
+    }
+
+    .alerta-barra.restrita {
+      background-color: #ffcdd2;
+      /* vermelho suave */
+      color: #b71c1c;
+      border-left: 6px solid #f44336;
+    }
+
+    .alerta-barra.aberta {
+      background-color: #c8e6c9;
+      /* verde suave */
+      color: #1b5e20;
+      border-left: 6px solid #43a047;
+    }
+
+    .blink-circle {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      animation: blink 1s infinite;
+    }
+
+    .blink-green {
+      background-color: green;
+    }
+
+    .blink-orange {
+      background-color: orange;
+    }
+
+    .blink-yellow {
+      background-color: gold;
+    }
+
+    /* opcional para saída futura */
+    .blink-red {
+      background-color: red;
+    }
+
+    @keyframes blink {
+      0% {
         opacity: 1;
-        color: #0d6efd;
       }
 
-      .sortable.desc::after {
-        content: "↓";
+      50% {
+        opacity: 0.1;
+      }
+
+      100% {
         opacity: 1;
-        color: #0d6efd;
+      }
+    }
+
+    /* Loading spinner */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      display: none;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #3498db;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
       }
 
-      .sortable:hover::after {
-        opacity: 0.8;
+      100% {
+        transform: rotate(360deg);
       }
+    }
+  </style>
+</head>
 
-      /* Melhorias na tabela */
-      .table-hover tbody tr:hover {
-        background-color: rgba(13, 110, 253, 0.05) !important;
-      }
+<body>
+  <!-- Loading overlay -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner"></div>
+  </div>
+  <div class="container my-4">
+    {% if barra_info %}
+    <div class="alert alerta-barra text-center {{ 'restrita' if barra_info.restrita else 'aberta' }}">
+      <i class="fas fa-info-circle me-2"></i>
+      {{ barra_info.mensagem }}
+    </div>
+    {% endif %}
 
-      .alerta-barra.restrita {
-        background-color: #ffcdd2;
-        /* vermelho suave */
-        color: #b71c1c;
-        border-left: 6px solid #f44336;
-      }
+    <h3 class="text-center mb-4">
+      NaviFlow
+      <span class="material-icons" style="font-size: 36px; vertical-align: middle">directions_boat</span>
+    </h3>
 
-      .alerta-barra.aberta {
-        background-color: #c8e6c9;
-        /* verde suave */
-        color: #1b5e20;
-        border-left: 6px solid #43a047;
-      }
 
-      .blink-circle {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        display: inline-block;
-        animation: blink 1s infinite;
-      }
+    <div id="last-update">Última atualização: {{ ultima_atualizacao }}</div>
 
-      .blink-green {
-        background-color: green;
-      }
-
-      .blink-orange {
-        background-color: orange;
-      }
-
-      .blink-yellow {
-        background-color: gold;
-      }
-
-      /* opcional para saída futura */
-      .blink-red {
-        background-color: red;
-      }
-
-      @keyframes blink {
-        0% {
-          opacity: 1;
-        }
-
-        50% {
-          opacity: 0.1;
-        }
-
-        100% {
-          opacity: 1;
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="container my-4">
-      {% if barra_info %}
-      <div
-        class="alert alerta-barra text-center {{ 'restrita' if barra_info.restrita else 'aberta' }}"
-      >
-        <i class="fas fa-info-circle me-2"></i>
-        {{ barra_info.mensagem }}
-      </div>
-      {% endif %}
-
-      <h3 class="text-center mb-4">
-        NaviFlow
-        <span
-          class="material-icons"
-          style="font-size: 36px; vertical-align: middle"
-          >directions_boat</span
-        >
-      </h3>
-
-      <div id="last-update">Última atualização: {{ ultima_atualizacao }}</div>
-
-      <div class="table-responsive">
-        <table
-          class="table table-striped table-hover text-center align-middle"
-          id="navios-table"
-        >
-          <thead class="table-primary">
-            <tr>
-              <th class="sortable" onclick="sortTable(0)">Data</th>
-              <th class="sortable" onclick="sortTable(1)">Hora</th>
-              <th class="sortable" onclick="sortTable(2)">Navio</th>
-              <th class="sortable" onclick="sortTable(3)">IMO</th>
-              <th class="sortable" onclick="sortTable(4)">Tipo</th>
-              <th class="sortable" onclick="sortTable(5)">Calado</th>
-              <th class="sortable" onclick="sortTable(6)">Manobra</th>
-              <th class="sortable" onclick="sortTable(7)">Beço</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for navio in navios %}
-            <tr class="{{ navio.status }}">
-              <td>{{ navio.data }}</td>
-              <td>
-                {% if navio.alerta == 'entrada_antecipada' %}
-                <span class="blink-circle blink-orange"></span>
-                {% elif navio.alerta == 'entrada_futura' %}
-                <span class="blink-circle blink-green"></span>
-                {% elif navio.alerta == 'saida_futura' %}
-                <span class="blink-circle blink-yellow"></span> {# Opcional #}
-                {% elif navio.alerta == 'saida_atrasada' %}
-                <span class="blink-circle blink-red"></span>
-                {% endif %} {{ navio.hora }}
-              </td>
-              <td>{{ navio.navio }}</td>
-              <td>{{ navio.imo if navio.imo else '-' }}</td>
-              <td>
-                <div class="tipo-icon">
-                  {% if navio.icone %}
-                  <img src="{{ navio.icone }}" alt="Ícone" />
-                  {% endif %} {{ navio.tipo_navio if navio.tipo_navio else '-'
-                  }}
-                </div>
-              </td>
-              <td>{{ navio.calado }}</td>
-              <td>
-                {% if navio.manobra == "E" %}
-                <span class="badge rounded-pill text-bg-success">ENTRADA</span>
-                {% elif navio.manobra == "S" %}
-                <span class="badge rounded-pill text-bg-danger">SAÍDA</span>
-                {% elif navio.manobra == "M" %}
-                <span class="badge rounded-pill text-bg-warning">MUDANÇA</span>
-                {% else %} {{ navio.manobra }} {% endif %}
-              </td>
-              <td>{{ navio.beco }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="terminal-selector">
+        <select id="terminal-select" class="form-select form-select-sm" style="width: auto;">
+          <option value="rio" {% if terminal_selecionado=='rio' %}selected{% endif %}>Rio Brasil Terminal</option>
+          <option value="multi" {% if terminal_selecionado=='multi' %}selected{% endif %}>Multiterminais</option>
+        </select>
       </div>
     </div>
 
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
-      crossorigin="anonymous"
-    ></script>
-    <script>
-      // Variável para controlar a direção da ordenação
-      let currentSort = {
-        column: null,
-        direction: "asc", // 'asc' ou 'desc'
-      };
+    <div class="table-responsive">
+      <table class="table table-striped table-hover text-center align-middle" id="navios-table">
+        <thead class="table-primary">
+          <tr>
+            <th class="sortable" onclick="sortTable(0)">Data</th>
+            <th class="sortable" onclick="sortTable(1)">Hora</th>
+            <th class="sortable" onclick="sortTable(2)">Navio</th>
+            <th class="sortable" onclick="sortTable(3)">IMO</th>
+            <th class="sortable" onclick="sortTable(4)">Tipo</th>
+            <th class="sortable" onclick="sortTable(5)">Calado</th>
+            <th class="sortable" onclick="sortTable(6)">Manobra</th>
+            <th class="sortable" onclick="sortTable(7)">Beço</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for navio in navios %}
+          <tr class="{{ navio.status }}">
+            <td>{{ navio.data }}</td>
+            <td>
+              {% if navio.alerta == 'entrada_antecipada' %}
+              <span class="blink-circle blink-orange"></span>
+              {% elif navio.alerta == 'entrada_futura' %}
+              <span class="blink-circle blink-green"></span>
+              {% elif navio.alerta == 'saida_futura' %}
+              <span class="blink-circle blink-yellow"></span> {# Opcional #}
+              {% elif navio.alerta == 'saida_atrasada' %}
+              <span class="blink-circle blink-red"></span>
+              {% endif %} {{ navio.hora }}
+            </td>
+            <td>{{ navio.navio }}</td>
+            <td>{{ navio.imo if navio.imo else '-' }}</td>
+            <td>
+              <div class="tipo-icon">
+                {% if navio.icone %}
+                <img src="{{ navio.icone }}" alt="Ícone" />
+                {% endif %} {{ navio.tipo_navio if navio.tipo_navio else '-'
+                }}
+              </div>
+            </td>
+            <td>{{ navio.calado }}</td>
+            <td>
+              {% if navio.manobra == "E" %}
+              <span class="badge rounded-pill text-bg-success">ENTRADA</span>
+              {% elif navio.manobra == "S" %}
+              <span class="badge rounded-pill text-bg-danger">SAÍDA</span>
+              {% elif navio.manobra == "M" %}
+              <span class="badge rounded-pill text-bg-warning">MUDANÇA</span>
+              {% else %} {{ navio.manobra }} {% endif %}
+            </td>
+            <td>{{ navio.beco }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-      // Função para ordenar a tabela
-      function sortTable(columnIndex) {
-        const table = document.getElementById("navios-table");
-        const tbody = table.tBodies[0];
-        const rows = Array.from(tbody.querySelectorAll("tr"));
-        const headers = table.querySelectorAll("th.sortable");
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
+    crossorigin="anonymous"></script>
+  <script>
+    // Variável para controlar a direção da ordenação
+    let currentSort = {
+      column: null,
+      direction: "asc", // 'asc' ou 'desc'
+    };
 
-        // Remove classes de ordenação de todos os cabeçalhos
-        headers.forEach((header) => {
-          header.classList.remove("asc", "desc");
-        });
+    // Função para mostrar/ocultar o loading
+    function toggleLoading(show) {
+      const overlay = document.getElementById('loading-overlay');
+      overlay.style.display = show ? 'flex' : 'none';
+    }
 
-        // Se clicarmos na mesma coluna, invertemos a direção
-        if (currentSort.column === columnIndex) {
-          currentSort.direction =
-            currentSort.direction === "asc" ? "desc" : "asc";
-        } else {
-          // Se for uma coluna diferente, ordenamos asc por padrão
-          currentSort.column = columnIndex;
-          currentSort.direction = "asc";
+    // Função para ordenar a tabela
+    function sortTable(columnIndex) {
+      const table = document.getElementById("navios-table");
+      const tbody = table.tBodies[0];
+      const rows = Array.from(tbody.querySelectorAll("tr"));
+      const headers = table.querySelectorAll("th.sortable");
+
+      // Remove classes de ordenação de todos os cabeçalhos
+      headers.forEach((header) => {
+        header.classList.remove("asc", "desc");
+      });
+
+      // Se clicarmos na mesma coluna, invertemos a direção
+      if (currentSort.column === columnIndex) {
+        currentSort.direction =
+          currentSort.direction === "asc" ? "desc" : "asc";
+      } else {
+        // Se for uma coluna diferente, ordenamos asc por padrão
+        currentSort.column = columnIndex;
+        currentSort.direction = "asc";
+      }
+
+      // Adiciona classe ao cabeçalho atual
+      headers[columnIndex].classList.add(currentSort.direction);
+
+      rows.sort((a, b) => {
+        const aText = a.cells[columnIndex].textContent.trim();
+        const bText = b.cells[columnIndex].textContent.trim();
+
+        // Tratamento especial para datas (coluna 0)
+        if (columnIndex === 0) {
+          const [dayA, monthA, yearA] = aText.split("/");
+          const [dayB, monthB, yearB] = bText.split("/");
+          const dateA = new Date(`${yearA}-${monthA}-${dayA}`);
+          const dateB = new Date(`${yearB}-${monthB}-${dayB}`);
+
+          return currentSort.direction === "asc"
+            ? dateA - dateB
+            : dateB - dateA;
         }
 
-        // Adiciona classe ao cabeçalho atual
-        headers[columnIndex].classList.add(currentSort.direction);
+        // Tratamento especial para horas (coluna 1)
+        if (columnIndex === 1) {
+          const [hoursA, minutesA] = aText.split(":").map(Number);
+          const [hoursB, minutesB] = bText.split(":").map(Number);
+          const totalMinutesA = hoursA * 60 + minutesA;
+          const totalMinutesB = hoursB * 60 + minutesB;
 
-        rows.sort((a, b) => {
-          const aText = a.cells[columnIndex].textContent.trim();
-          const bText = b.cells[columnIndex].textContent.trim();
-
-          // Tratamento especial para datas (coluna 0)
-          if (columnIndex === 0) {
-            const [dayA, monthA, yearA] = aText.split("/");
-            const [dayB, monthB, yearB] = bText.split("/");
-            const dateA = new Date(`${yearA}-${monthA}-${dayA}`);
-            const dateB = new Date(`${yearB}-${monthB}-${dayB}`);
-
-            return currentSort.direction === "asc"
-              ? dateA - dateB
-              : dateB - dateA;
-          }
-
-          // Tratamento especial para horas (coluna 1)
-          if (columnIndex === 1) {
-            const [hoursA, minutesA] = aText.split(":").map(Number);
-            const [hoursB, minutesB] = bText.split(":").map(Number);
-            const totalMinutesA = hoursA * 60 + minutesA;
-            const totalMinutesB = hoursB * 60 + minutesB;
-
-            return currentSort.direction === "asc"
-              ? totalMinutesA - totalMinutesB
-              : totalMinutesB - totalMinutesA;
-          }
-
-          // Tratamento especial para números (coluna 5 - Calado)
-          if (columnIndex === 5) {
-            const numA = parseFloat(aText.replace(",", "."));
-            const numB = parseFloat(bText.replace(",", "."));
-
-            return currentSort.direction === "asc" ? numA - numB : numB - numA;
-          }
-
-          // Ordenação padrão para texto
           return currentSort.direction === "asc"
-            ? aText.localeCompare(bText, "pt-BR", { sensitivity: "base" })
-            : bText.localeCompare(aText, "pt-BR", { sensitivity: "base" });
-        });
+            ? totalMinutesA - totalMinutesB
+            : totalMinutesB - totalMinutesA;
+        }
 
-        // Reinsere as linhas ordenadas na tabela
-        rows.forEach((row) => tbody.appendChild(row));
-      }
+        // Tratamento especial para números (coluna 5 - Calado)
+        if (columnIndex === 5) {
+          const numA = parseFloat(aText.replace(",", "."));
+          const numB = parseFloat(bText.replace(",", "."));
 
-      function atualizarTabela() {
-        fetch("/api/navios")
-          .then((response) => response.json())
-          .then((data) => {
-            const tabela = document.querySelector("#navios-table tbody");
-            tabela.innerHTML = "";
+          return currentSort.direction === "asc" ? numA - numB : numB - numA;
+        }
 
-            data.navios.forEach((navio) => {
-              const row = document.createElement("tr");
-              row.className = navio.status;
+        // Ordenação padrão para texto
+        return currentSort.direction === "asc"
+          ? aText.localeCompare(bText, "pt-BR", { sensitivity: "base" })
+          : bText.localeCompare(aText, "pt-BR", { sensitivity: "base" });
+      });
 
-              let alertaHTML = "";
-              if (navio.alerta === "entrada_antecipada") {
-                alertaHTML = '<span class="blink-circle blink-orange"></span>';
-              } else if (navio.alerta === "entrada_futura") {
-                alertaHTML = '<span class="blink-circle blink-green"></span>';
-              } else if (navio.alerta === "saida_futura") {
-                alertaHTML = '<span class="blink-circle blink-yellow"></span>';
-              } else if (navio.alerta === "saida_atrasada") {
-                alertaHTML = '<span class="blink-circle blink-red"></span>';
-              }
+      // Reinsere as linhas ordenadas na tabela
+      rows.forEach((row) => tbody.appendChild(row));
+    }
 
-              row.innerHTML = `
-          <td>${navio.data}</td>
-          <td>${alertaHTML} ${navio.hora}</td>
-          <td>${navio.navio}</td>
-          <td>${navio.imo || "-"}</td>
-          <td class="tipo-icon">
-            ${
-              navio.icone
+    // Função para atualizar a tabela com base no terminal selecionado
+    function atualizarTabela(terminal = 'rio') {
+      toggleLoading(true); // Mostra o loading
+
+      fetch(`/api/navios?terminal=${terminal}`)
+        .then((response) => response.json())
+        .then((data) => {
+          const tabela = document.querySelector("#navios-table tbody");
+          tabela.innerHTML = "";
+
+          data.navios.forEach((navio) => {
+            const row = document.createElement("tr");
+            row.className = navio.status;
+
+            let alertaHTML = "";
+            if (navio.alerta === "entrada_antecipada") {
+              alertaHTML = '<span class="blink-circle blink-orange"></span>';
+            } else if (navio.alerta === "entrada_futura") {
+              alertaHTML = '<span class="blink-circle blink-green"></span>';
+            } else if (navio.alerta === "saida_futura") {
+              alertaHTML = '<span class="blink-circle blink-yellow"></span>';
+            } else if (navio.alerta === "saida_atrasada") {
+              alertaHTML = '<span class="blink-circle blink-red"></span>';
+            }
+
+            row.innerHTML = `
+            <td>${navio.data}</td>
+            <td>${alertaHTML} ${navio.hora}</td>
+            <td>${navio.navio}</td>
+            <td>${navio.imo || "-"}</td>
+            <td class="tipo-icon">
+              ${navio.icone
                 ? `<img src="${navio.icone}" alt="Ícone" width="30" height="30">`
                 : ""
-            }
-            ${navio.tipo_navio || "-"}
-          </td>
-          <td>${navio.calado}</td>
-          <td>
-  ${
-    navio.manobra === "E"
-      ? '<span class="badge rounded-pill text-bg-success">ENTRADA</span>'
-      : navio.manobra === "S"
-      ? '<span class="badge rounded-pill text-bg-danger">SAÍDA</span>'
-      : navio.manobra === "M"
-      ? '<span class="badge rounded-pill text-bg-warning text-dark">MUDANÇA</span>'
-      : navio.manobra
-  }
-</td>
-
-          <td>${navio.beco}</td>
-        `;
-              tabela.appendChild(row);
-            });
-
-            document.getElementById(
-              "last-update"
-            ).innerText = `Última atualização: ${data.ultima_atualizacao}`;
-
-            // Atualizar alerta da barra
-            const alertaBarra = document.querySelector(".alerta-barra");
-            if (alertaBarra) {
-              alertaBarra.classList.remove("restrita", "aberta");
-              alertaBarra.classList.add(
-                data.barra_info.restrita ? "restrita" : "aberta"
-              );
-              alertaBarra.innerHTML = `<i class="fas fa-info-circle me-2"></i> ${data.barra_info.mensagem}`;
-            }
-          })
-          .catch((err) => {
-            console.error("Erro ao atualizar dados:", err);
+              }
+              ${navio.tipo_navio || "-"}
+            </td>
+            <td>${navio.calado}</td>
+            <td>
+              ${navio.manobra === "E"
+                ? '<span class="badge rounded-pill text-bg-success">ENTRADA</span>'
+                : navio.manobra === "S"
+                  ? '<span class="badge rounded-pill text-bg-danger">SAÍDA</span>'
+                  : navio.manobra === "M"
+                    ? '<span class="badge rounded-pill text-bg-warning text-dark">MUDANÇA</span>'
+                    : navio.manobra
+              }
+            </td>
+            <td>${navio.beco}</td>
+          `;
+            tabela.appendChild(row);
           });
+
+          document.getElementById("last-update").innerText = `Última atualização: ${data.ultima_atualizacao}`;
+
+          // Atualizar alerta da barra
+          const alertaBarra = document.querySelector(".alerta-barra");
+          if (alertaBarra) {
+            alertaBarra.classList.remove("restrita", "aberta");
+            alertaBarra.classList.add(
+              data.barra_info.restrita ? "restrita" : "aberta"
+            );
+            alertaBarra.innerHTML = `<i class="fas fa-info-circle me-2"></i> ${data.barra_info.mensagem}`;
+          }
+        })
+        .catch((err) => {
+          console.error("Erro ao atualizar dados:", err);
+        })
+        .finally(() => {
+          toggleLoading(false); // Esconde o loading independente do resultado
+        });
+    }
+
+    // Event listener para o seletor de terminais
+    document.getElementById('terminal-select').addEventListener('change', function () {
+      const terminal = this.value;
+      atualizarTabela(terminal);
+
+      // Salva a seleção no localStorage
+      localStorage.setItem('terminalSelecionado', terminal);
+    });
+
+    // Ao carregar a página, verifica se há uma seleção salva
+    document.addEventListener('DOMContentLoaded', function () {
+      const terminalSalvo = localStorage.getItem('terminalSelecionado');
+      const selectElement = document.getElementById('terminal-select');
+
+      if (terminalSalvo) {
+        selectElement.value = terminalSalvo;
       }
 
-      setInterval(atualizarTabela, 600000); // 10 minutos
-    </script>
-  </body>
+      // Carrega os dados com o terminal selecionado
+      atualizarTabela(selectElement.value);
+    });
+
+    // Atualização automática mantendo o terminal selecionado
+    setInterval(() => {
+      const terminal = document.getElementById('terminal-select').value;
+      atualizarTabela(terminal);
+    }, 600000); // 10 minutos
+  </script>
+</body>
+
 </html>
