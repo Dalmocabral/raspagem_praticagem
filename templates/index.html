@@ -156,6 +156,13 @@
         transform: rotate(360deg);
       }
     }
+
+    .porterne-icon {
+      width: 24px;
+      height: 24px;
+      margin-left: 5px;
+      vertical-align: middle;
+    }
   </style>
 </head>
 
@@ -193,6 +200,7 @@
       <table class="table table-striped table-hover text-center align-middle" id="navios-table">
         <thead class="table-primary">
           <tr>
+            <th class="sortable" onclick="sortTable(0)">Alerta</th>
             <th class="sortable" onclick="sortTable(0)">Data</th>
             <th class="sortable" onclick="sortTable(1)">Hora</th>
             <th class="sortable" onclick="sortTable(2)">Navio</th>
@@ -206,6 +214,12 @@
         <tbody>
           {% for navio in navios %}
           <tr class="{{ navio.status }}">
+            <td>
+              {% if navio.conflito_porterne %}
+              <img src="https://i.ibb.co/m5yy049q/portane.png" alt="Conflito Portêner" class="porterne-icon"
+                title="Possível conflito levamtamento de lança do portêner" />
+              {% endif %}
+            </td>
             <td>{{ navio.data }}</td>
             <td>
               {% if navio.alerta == 'entrada_antecipada' %}
@@ -258,8 +272,8 @@
 
     // Função para mostrar/ocultar o loading
     function toggleLoading(show) {
-      const overlay = document.getElementById('loading-overlay');
-      overlay.style.display = show ? 'flex' : 'none';
+      const overlay = document.getElementById("loading-overlay");
+      overlay.style.display = show ? "flex" : "none";
     }
 
     // Função para ordenar a tabela
@@ -334,7 +348,7 @@
     }
 
     // Função para atualizar a tabela com base no terminal selecionado
-    function atualizarTabela(terminal = 'rio') {
+    function atualizarTabela(terminal = "rio") {
       toggleLoading(true); // Mostra o loading
 
       fetch(`/api/navios?terminal=${terminal}`)
@@ -358,10 +372,16 @@
               alertaHTML = '<span class="blink-circle blink-red"></span>';
             }
 
+            let porterneIconHTML = "";
+            if (navio.conflito_porterne) {
+              porterneIconHTML = '<img src="https://i.ibb.co/m5yy049q/portane.png" alt="Conflito Portêner" class="porterne-icon" title="Possível necessidade de levantar lança do portêiner" />';
+            }
+
             row.innerHTML = `
+            <td>${porterneIconHTML}</td>
             <td>${navio.data}</td>
             <td>${alertaHTML} ${navio.hora}</td>
-            <td>${navio.navio}</td>
+            <td>${navio.navio} </td>
             <td>${navio.imo || "-"}</td>
             <td class="tipo-icon">
               ${navio.icone
@@ -407,18 +427,18 @@
     }
 
     // Event listener para o seletor de terminais
-    document.getElementById('terminal-select').addEventListener('change', function () {
+    document.getElementById("terminal-select").addEventListener("change", function () {
       const terminal = this.value;
       atualizarTabela(terminal);
 
       // Salva a seleção no localStorage
-      localStorage.setItem('terminalSelecionado', terminal);
+      localStorage.setItem("terminalSelecionado", terminal);
     });
 
     // Ao carregar a página, verifica se há uma seleção salva
-    document.addEventListener('DOMContentLoaded', function () {
-      const terminalSalvo = localStorage.getItem('terminalSelecionado');
-      const selectElement = document.getElementById('terminal-select');
+    document.addEventListener("DOMContentLoaded", function () {
+      const terminalSalvo = localStorage.getItem("terminalSelecionado");
+      const selectElement = document.getElementById("terminal-select");
 
       if (terminalSalvo) {
         selectElement.value = terminalSalvo;
@@ -430,10 +450,11 @@
 
     // Atualização automática mantendo o terminal selecionado
     setInterval(() => {
-      const terminal = document.getElementById('terminal-select').value;
+      const terminal = document.getElementById("terminal-select").value;
       atualizarTabela(terminal);
     }, 600000); // 10 minutos
   </script>
+
 </body>
 
 </html>
