@@ -11,6 +11,11 @@ app = Flask(__name__)
 
 URL = "https://www.praticagem-rj.com.br/"
 
+# Lista de berços que devem ser incluídos quando selecionar "Todos os Terminais"
+BERCOS_INCLUIR_TODOS = {
+    'TECONTPROLONG', 'TECONT1', 'TECONT2', 'TECONT3', 'TECONT4', 'TECONT5', 
+    'MANGUINHOS', 'PG1'
+}
 
 def get_status_barra():
     try:
@@ -69,16 +74,21 @@ def get_all_navios_manobras():
                     else cols[11].get_text(strip=True)
                 )
 
+                # Verifica se o navio está em algum dos berços que nos interessam
+                tem_berco_interesse = any(berco in becos for berco in BERCOS_INCLUIR_TODOS)
+                
                 current_terminal = None
-                if "TECONTPROLONG" in becos or "TECONT1" in becos:
+                if not tem_berco_interesse:
+                    continue  # Ignora navios que não estão nos berços de interesse
+                elif "TECONTPROLONG" in becos or "TECONT1" in becos:
                     current_terminal = "rio"
-                elif (
-                    "TECONT4" in becos
-                    or "TECONT2" in becos
-                    or "TECONT3" in becos
-                    or "TECONT5" in becos
-                ):
+                elif "TECONT4" in becos or "TECONT2" in becos or "TECONT3" in becos or "TECONT5" in becos:
                     current_terminal = "multi"
+                elif "MANGUINHOS" in becos:
+                    current_terminal = "manguinhos"
+                elif "PG1" in becos:
+                    current_terminal = "pg1"
+
                 imo = None
                 tipo_navio = None
                 tooltip_escondida = cols[1].find("div", class_="tooltipDivEscondida")
@@ -91,11 +101,13 @@ def get_all_navios_manobras():
                         tipo_navio = (
                             tipo_navio_span.get_text(strip=True).split("(")[0].strip()
                         )
+                
                 data, hora = data_hora.split()
                 if ":" not in hora:
                     hora = hora + ":00"
                 elif hora.count(":") == 1 and len(hora.split(":")[1]) == 1:
                     hora = hora.replace(":", ":0")
+                
                 dia, mes = map(int, data.split("/"))
                 hora_part, minuto_part = map(int, hora.split(":"))
                 hoje = datetime.now()
@@ -106,6 +118,7 @@ def get_all_navios_manobras():
                     status = "hoje"
                 elif navio_date < hoje:
                     status = "passado"
+                
                 alerta = None
                 agora = datetime.now()
                 if manobra == "E":  # ENTRADA
@@ -118,6 +131,7 @@ def get_all_navios_manobras():
                         alerta = "saida_futura"
                     elif agora >= navio_date:
                         alerta = "saida_atrasada"
+                
                 icone = "https://i.ibb.co/cX1DXDhW/icon-container.png"
                 if tipo_navio:
                     if "CONTAINER SHIP" in tipo_navio.upper():
@@ -136,6 +150,7 @@ def get_all_navios_manobras():
                         icone = "https://i.ibb.co/ymWQg66b/offshoer.png"
                     elif "SUPPLY SHIP" in tipo_navio.upper():
                         icone = "https://i.ibb.co/ccHFRkVD/suplay-ship.png"
+                
                 navios_manobras.append(
                     {
                         "data": data,
@@ -159,13 +174,22 @@ def get_all_navios_manobras():
     return navios_manobras
 
 
-def get_navios(terminal_filter=None):
+def get_navios(terminal_filter='todos'):
     all_navios_manobras = get_all_navios_manobras()
-
+    
     navios_filtrados = []
     for n in all_navios_manobras:
-        if terminal_filter is None or n["terminal"] == terminal_filter:
+        if terminal_filter == 'todos':
             navios_filtrados.append(n)
+        elif terminal_filter == 'rio' and n['terminal'] == 'rio':
+            navios_filtrados.append(n)
+        elif terminal_filter == 'multi' and n['terminal'] == 'multi':
+            navios_filtrados.append(n)
+        elif terminal_filter == 'manguinhos' and n['terminal'] == 'manguinhos':
+            navios_filtrados.append(n)
+        elif terminal_filter == 'pg1' and n['terminal'] == 'pg1':
+            navios_filtrados.append(n)
+
     navios_unicos = []
     vistos = set()
 
@@ -186,6 +210,7 @@ def detectar_conflitos(navios_rio_manobras, navios_multi_manobras):
         if navio_nome not in navios_rio_agrupados:
             navios_rio_agrupados[navio_nome] = []
         navios_rio_agrupados[navio_nome].append(manobra_rio)
+    
     for navio_nome_rio, manobras_rio in navios_rio_agrupados.items():
         manobras_rio.sort(key=lambda x: x["navio_date_obj"])
 
@@ -196,10 +221,12 @@ def detectar_conflitos(navios_rio_manobras, navios_multi_manobras):
             if m["manobra"] == "E" or periodo_inicio_rio is None:
                 periodo_inicio_rio = m["navio_date_obj"]
                 break
+        
         for m in reversed(manobras_rio):
             if m["manobra"] == "S" or periodo_fim_rio is None:
                 periodo_fim_rio = m["navio_date_obj"]
                 break
+
         if periodo_inicio_rio and not periodo_fim_rio:
             periodo_fim_rio = periodo_inicio_rio + timedelta(hours=4)
         elif not periodo_inicio_rio and periodo_fim_rio:
@@ -209,53 +236,31 @@ def detectar_conflitos(navios_rio_manobras, navios_multi_manobras):
             periodo_fim_rio = manobras_rio[-1]["navio_date_obj"]
             if periodo_inicio_rio == periodo_fim_rio:
                 periodo_fim_rio = periodo_inicio_rio + timedelta(hours=4)
+
         if not periodo_inicio_rio or not periodo_fim_rio:
             continue
+
         for manobra_multi in navios_multi_manobras:
             if manobra_multi["manobra"] in ["E", "S"]:
-                janela_multi_inicio = manobra_multi["navio_date_obj"] - timedelta(
-                    hours=1
-                )
+                janela_multi_inicio = manobra_multi["navio_date_obj"] - timedelta(hours=1)
                 janela_multi_fim = manobra_multi["navio_date_obj"] + timedelta(hours=1)
 
-                if max(periodo_inicio_rio, janela_multi_inicio) < min(
-                    periodo_fim_rio, janela_multi_fim
-                ):
+                if max(periodo_inicio_rio, janela_multi_inicio) < min(periodo_fim_rio, janela_multi_fim):
                     manobra_afetada_rio = None
                     min_diff = timedelta(days=999)
 
-                    # Priorizar a manobra do Rio que está mais próxima da manobra do Multi
-                    # E também priorizar a mesma manobra (E com E, S com S)
-
                     for m_rio in manobras_rio:
                         if m_rio["manobra"] in ["E", "S"]:
-                            diff = abs(
-                                m_rio["navio_date_obj"]
-                                - manobra_multi["navio_date_obj"]
-                            )
+                            diff = abs(m_rio["navio_date_obj"] - manobra_multi["navio_date_obj"])
 
-                            # Se a manobra do Rio é do mesmo tipo da manobra do Multi e a diferença é menor ou igual
-
-                            if (
-                                m_rio["manobra"] == manobra_multi["manobra"]
-                                and diff <= min_diff
-                            ):
+                            if (m_rio["manobra"] == manobra_multi["manobra"] and diff <= min_diff):
                                 min_diff = diff
                                 manobra_afetada_rio = m_rio["manobra"]
-                                # Se encontrou uma correspondência exata e próxima, pode parar de procurar por este navio
-
                                 if diff == timedelta(0):
                                     break
-                            # Se a manobra do Rio é de tipo diferente, mas ainda é a mais próxima até agora
-
-                            elif (
-                                m_rio["manobra"] != manobra_multi["manobra"]
-                                and diff < min_diff
-                            ):
+                            elif (m_rio["manobra"] != manobra_multi["manobra"] and diff < min_diff):
                                 min_diff = diff
                                 manobra_afetada_rio = m_rio["manobra"]
-                    # Se não encontrou uma manobra específica (E ou S) para o navio do Rio, mas há conflito,
-                    # tenta encontrar a primeira manobra de entrada ou saída para associar o ícone.
 
                     if manobra_afetada_rio is None:
                         for m_rio in manobras_rio:
@@ -267,21 +272,16 @@ def detectar_conflitos(navios_rio_manobras, navios_multi_manobras):
                                 if m_rio["manobra"] == "S":
                                     manobra_afetada_rio = "S"
                                     break
-                    conflitos.append(
-                        {
-                            "navio_rio": navio_nome_rio,
-                            "manobra_rio_afetada": manobra_afetada_rio,
-                            "manobra_rio_inicio": periodo_inicio_rio.strftime(
-                                "%d/%m %H:%M"
-                            ),
-                            "manobra_rio_fim": periodo_fim_rio.strftime("%d/%m %H:%M"),
-                            "navio_multi": manobra_multi["navio"],
-                            "manobra_multi_tipo": manobra_multi["manobra"],
-                            "manobra_multi_data_hora": manobra_multi[
-                                "navio_date_obj"
-                            ].strftime("%d/%m %H:%M"),
-                        }
-                    )
+
+                    conflitos.append({
+                        "navio_rio": navio_nome_rio,
+                        "manobra_rio_afetada": manobra_afetada_rio,
+                        "manobra_rio_inicio": periodo_inicio_rio.strftime("%d/%m %H:%M"),
+                        "manobra_rio_fim": periodo_fim_rio.strftime("%d/%m %H:%M"),
+                        "navio_multi": manobra_multi["navio"],
+                        "manobra_multi_tipo": manobra_multi["manobra"],
+                        "manobra_multi_data_hora": manobra_multi["navio_date_obj"].strftime("%d/%m %H:%M"),
+                    })
     return conflitos
 
 
@@ -298,49 +298,34 @@ def home():
 
     conflitos_encontrados = detectar_conflitos(navios_rio, navios_multi)
 
-    # Resetar a flag de conflito para todos os navios do Rio
-
     for navio_rio_manobra in navios_rio:
         navio_rio_manobra["conflito_porterne"] = False
-        navio_rio_manobra["conflito_manobra_tipo"] = (
-            None  # Adiciona um campo para armazenar o tipo de manobra afetada
-        )
-    # Dicionário para controlar qual manobra (E ou S) já foi marcada para cada navio
+        navio_rio_manobra["conflito_manobra_tipo"] = None
 
     navios_com_porterne_marcado = {}
-
     for conflito in conflitos_encontrados:
         navio_nome = conflito["navio_rio"]
         manobra_afetada = conflito["manobra_rio_afetada"]
 
-        # Se o navio já teve uma manobra (E ou S) marcada, pular
-
         if navio_nome in navios_com_porterne_marcado:
             continue
-        # Encontrar a manobra específica do navio do Rio para marcar
-
+        
         for navio_rio_manobra in navios_rio:
-            if (
-                navio_rio_manobra["navio"] == navio_nome
-                and navio_rio_manobra["manobra"] == manobra_afetada
-            ):
+            if (navio_rio_manobra["navio"] == navio_nome and 
+                navio_rio_manobra["manobra"] == manobra_afetada):
                 navio_rio_manobra["conflito_porterne"] = True
-                navio_rio_manobra["conflito_manobra_tipo"] = (
-                    manobra_afetada  # Armazena o tipo de manobra afetada
-                )
-                navios_com_porterne_marcado[navio_nome] = (
-                    manobra_afetada  # Marca o navio como já processado
-                )
+                navio_rio_manobra["conflito_manobra_tipo"] = manobra_afetada
+                navios_com_porterne_marcado[navio_nome] = manobra_afetada
                 break
-    # Filtrar navios para exibição na tabela principal (apenas os do Rio, por padrão)
 
     navios_para_exibir = []
     vistos = set()
-    for n in navios_rio:
+    for n in all_navios_data:
         chave = (n["data"], n["hora"], n["navio"], n["manobra"])
         if chave not in vistos:
             navios_para_exibir.append(n)
             vistos.add(chave)
+
     barra_info = get_status_barra()
 
     return render_template(
@@ -348,8 +333,7 @@ def home():
         navios=navios_para_exibir,
         ultima_atualizacao=ultima_atualizacao,
         barra_info=barra_info,
-        terminal_selecionado="rio",
-        conflitos=conflitos_encontrados,
+        terminal_selecionado="todos",
     )
 
 
@@ -359,7 +343,7 @@ def api_navios():
     agora = datetime.now(tz)
     ultima_atualizacao = agora.strftime("%d/%m/%Y %H:%M")
 
-    terminal_filter = request.args.get("terminal", "rio")
+    terminal_filter = request.args.get("terminal", "todos")
 
     all_navios_data = get_all_navios_manobras()
 
@@ -371,6 +355,7 @@ def api_navios():
     for navio_rio_manobra in navios_rio:
         navio_rio_manobra["conflito_porterne"] = False
         navio_rio_manobra["conflito_manobra_tipo"] = None
+
     navios_com_porterne_marcado = {}
     for conflito in conflitos_encontrados:
         navio_nome = conflito["navio_rio"]
@@ -378,33 +363,37 @@ def api_navios():
 
         if navio_nome in navios_com_porterne_marcado:
             continue
+        
         for navio_rio_manobra in navios_rio:
-            if (
-                navio_rio_manobra["navio"] == navio_nome
-                and navio_rio_manobra["manobra"] == manobra_afetada
-            ):
+            if (navio_rio_manobra["navio"] == navio_nome and 
+                navio_rio_manobra["manobra"] == manobra_afetada):
                 navio_rio_manobra["conflito_porterne"] = True
                 navio_rio_manobra["conflito_manobra_tipo"] = manobra_afetada
                 navios_com_porterne_marcado[navio_nome] = manobra_afetada
                 break
+
     navios_para_exibir = []
     vistos = set()
     for n in all_navios_data:
-        if n["terminal"] == terminal_filter:
+        if (terminal_filter == 'todos' or
+            (terminal_filter == 'rio' and n['terminal'] == 'rio') or
+            (terminal_filter == 'multi' and n['terminal'] == 'multi') or
+            (terminal_filter == 'manguinhos' and n['terminal'] == 'manguinhos') or
+            (terminal_filter == 'pg1' and n['terminal'] == 'pg1')):
+            
             chave = (n["data"], n["hora"], n["navio"], n["manobra"])
             if chave not in vistos:
                 navios_para_exibir.append(n)
                 vistos.add(chave)
+
     barra_info = get_status_barra()
 
-    return jsonify(
-        {
-            "navios": navios_para_exibir,
-            "ultima_atualizacao": ultima_atualizacao,
-            "barra_info": barra_info,
-            "conflitos": conflitos_encontrados,
-        }
-    )
+    return jsonify({
+        "navios": navios_para_exibir,
+        "ultima_atualizacao": ultima_atualizacao,
+        "barra_info": barra_info,
+        "conflitos": conflitos_encontrados,
+    })
 
 
 if __name__ == "__main__":

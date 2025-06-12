@@ -184,14 +184,16 @@
       <span class="material-icons" style="font-size: 36px; vertical-align: middle">directions_boat</span>
     </h3>
 
-
     <div id="last-update">Última atualização: {{ ultima_atualizacao }}</div>
 
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div class="terminal-selector">
         <select id="terminal-select" class="form-select form-select-sm" style="width: auto;">
+          <option value="todos" {% if terminal_selecionado=='todos' %}selected{% endif %}>Todos os Terminais</option>
           <option value="rio" {% if terminal_selecionado=='rio' %}selected{% endif %}>Rio Brasil Terminal</option>
           <option value="multi" {% if terminal_selecionado=='multi' %}selected{% endif %}>Multiterminais</option>
+          <option value="manguinhos" {% if terminal_selecionado=='manguinhos' %}selected{% endif %}>Manguinhos</option>
+          <option value="pg1" {% if terminal_selecionado=='pg1' %}selected{% endif %}>PG1</option>
         </select>
       </div>
     </div>
@@ -348,10 +350,12 @@
     }
 
     // Função para atualizar a tabela com base no terminal selecionado
-    function atualizarTabela(terminal = "rio") {
-      toggleLoading(true); // Mostra o loading
+    function atualizarTabela(terminal = "rio", showLoading = false) {
+      if (showLoading) {
+        toggleLoading(true);
+      }
 
-      fetch(`/api/navios?terminal=${terminal}`)
+      return fetch(`/api/navios?terminal=${terminal}`)
         .then((response) => response.json())
         .then((data) => {
           const tabela = document.querySelector("#navios-table tbody");
@@ -422,14 +426,16 @@
           console.error("Erro ao atualizar dados:", err);
         })
         .finally(() => {
-          toggleLoading(false); // Esconde o loading independente do resultado
+          if (showLoading) {
+            toggleLoading(false);
+          }
         });
     }
 
     // Event listener para o seletor de terminais
     document.getElementById("terminal-select").addEventListener("change", function () {
       const terminal = this.value;
-      atualizarTabela(terminal);
+      atualizarTabela(terminal, true); // Mostra loading apenas quando o usuário muda a seleção
 
       // Salva a seleção no localStorage
       localStorage.setItem("terminalSelecionado", terminal);
@@ -444,17 +450,16 @@
         selectElement.value = terminalSalvo;
       }
 
-      // Carrega os dados com o terminal selecionado
-      atualizarTabela(selectElement.value);
+      // Carrega os dados com o terminal selecionado sem mostrar loading
+      atualizarTabela(selectElement.value, false);
     });
 
     // Atualização automática mantendo o terminal selecionado
     setInterval(() => {
       const terminal = document.getElementById("terminal-select").value;
-      atualizarTabela(terminal);
+      atualizarTabela(terminal, false); // Não mostra loading nas atualizações automáticas
     }, 600000); // 10 minutos
   </script>
-
 </body>
 
 </html>
