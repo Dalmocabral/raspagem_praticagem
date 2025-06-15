@@ -87,7 +87,7 @@ def get_all_navios_manobras():
                 elif "MANGUINHOS" in becos:
                     current_terminal = "manguinhos"
                 elif "PG1" in becos:
-                    current_terminal = "pg1"
+                    current_terminal = "PG1" in becos or "PG-1" in becos or "PG 1"
 
                 imo = None
                 tipo_navio = None
