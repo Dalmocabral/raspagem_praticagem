@@ -146,6 +146,7 @@ def get_all_navios_manobras():
                         "CARGO SHIP" in tipo_navio.upper()
                         or "OFFSHORE SHIP" in tipo_navio.upper()
                         or "OFFSHORE SUPPORT VESSEL" in tipo_navio.upper()
+                        or "DIVING SUPPORT VESSEL" in tipo_navio.upper()
                     ):
                         icone = "https://i.ibb.co/ymWQg66b/offshoer.png"
                     elif "SUPPLY SHIP" in tipo_navio.upper():

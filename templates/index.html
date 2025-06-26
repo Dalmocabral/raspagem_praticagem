@@ -187,14 +187,57 @@
     <div id="last-update">Última atualização: {{ ultima_atualizacao }}</div>
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <div class="terminal-selector">
-        <select id="terminal-select" class="form-select form-select-sm" style="width: auto;">
-          <option value="todos" {% if terminal_selecionado=='todos' %}selected{% endif %}>Todos os Terminais</option>
-          <option value="rio" {% if terminal_selecionado=='rio' %}selected{% endif %}>Rio Brasil Terminal</option>
-          <option value="multi" {% if terminal_selecionado=='multi' %}selected{% endif %}>Multiterminais</option>
-          <option value="manguinhos" {% if terminal_selecionado=='manguinhos' %}selected{% endif %}>Manguinhos</option>
-          <option value="pg1" {% if terminal_selecionado=='pg1' %}selected{% endif %}>PG1</option>
-        </select>
+      <div class="d-flex align-items-center">
+        <div class="terminal-selector me-2">
+          <select id="terminal-select" class="form-select form-select-sm" style="width: auto;">
+            <option value="todos" {% if terminal_selecionado=='todos' %}selected{% endif %}>Todos os Terminais</option>
+            <option value="rio" {% if terminal_selecionado=='rio' %}selected{% endif %}>Rio Brasil Terminal</option>
+            <option value="multi" {% if terminal_selecionado=='multi' %}selected{% endif %}>Multiterminais</option>
+            <option value="manguinhos" {% if terminal_selecionado=='manguinhos' %}selected{% endif %}>Manguinhos</option>
+            <option value="pg1" {% if terminal_selecionado=='pg1' %}selected{% endif %}>PG1</option>
+          </select>
+        </div>
+        
+        <!-- Botão de filtro -->
+        <div class="dropdown">
+          <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-filter"></i> Filtro
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="filterDropdown" id="terminal-filter-menu">
+            <li class="dropdown-item">
+              <div class="form-check">
+                <input class="form-check-input terminal-filter" type="checkbox" value="rio" id="filter-rio" checked>
+                <label class="form-check-label" for="filter-rio">
+                  Rio Brasil Terminal
+                </label>
+              </div>
+            </li>
+            <li class="dropdown-item">
+              <div class="form-check">
+                <input class="form-check-input terminal-filter" type="checkbox" value="multi" id="filter-multi" checked>
+                <label class="form-check-label" for="filter-multi">
+                  Multiterminais
+                </label>
+              </div>
+            </li>
+            <li class="dropdown-item">
+              <div class="form-check">
+                <input class="form-check-input terminal-filter" type="checkbox" value="manguinhos" id="filter-manguinhos" checked>
+                <label class="form-check-label" for="filter-manguinhos">
+                  Manguinhos
+                </label>
+              </div>
+            </li>
+            <li class="dropdown-item">
+              <div class="form-check">
+                <input class="form-check-input terminal-filter" type="checkbox" value="pg1" id="filter-pg1" checked>
+                <label class="form-check-label" for="filter-pg1">
+                  PG1
+                </label>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
 
@@ -215,7 +258,7 @@
         </thead>
         <tbody>
           {% for navio in navios %}
-          <tr class="{{ navio.status }}">
+          <tr class="{{ navio.status }}" data-terminal="{{ navio.terminal }}">
             <td>
               {% if navio.conflito_porterne %}
               <img src="https://i.ibb.co/m5yy049q/portane.png" alt="Conflito Portêner" class="porterne-icon"
@@ -276,6 +319,36 @@
     function toggleLoading(show) {
       const overlay = document.getElementById("loading-overlay");
       overlay.style.display = show ? "flex" : "none";
+    }
+
+    // Função para aplicar os filtros de terminal
+    function applyTerminalFilters() {
+      const terminalSelect = document.getElementById('terminal-select');
+      const rows = document.querySelectorAll('#navios-table tbody tr');
+      
+      // Se não estiver em "Todos os Terminais", mostra tudo e retorna
+      if (terminalSelect.value !== 'todos') {
+        rows.forEach(row => {
+          row.style.display = '';
+        });
+        return;
+      }
+      
+      // Obter terminais selecionados no filtro
+      const selectedTerminals = [];
+      document.querySelectorAll('.terminal-filter:checked').forEach(checkbox => {
+        selectedTerminals.push(checkbox.value);
+      });
+      
+      // Aplicar filtro
+      rows.forEach(row => {
+        const terminal = row.getAttribute('data-terminal');
+        if (selectedTerminals.includes(terminal)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
     }
 
     // Função para ordenar a tabela
@@ -347,6 +420,9 @@
 
       // Reinsere as linhas ordenadas na tabela
       rows.forEach((row) => tbody.appendChild(row));
+      
+      // Reaplica os filtros após ordenação
+      applyTerminalFilters();
     }
 
     // Função para atualizar a tabela com base no terminal selecionado
@@ -364,6 +440,7 @@
           data.navios.forEach((navio) => {
             const row = document.createElement("tr");
             row.className = navio.status;
+            row.setAttribute('data-terminal', navio.terminal);
 
             let alertaHTML = "";
             if (navio.alerta === "entrada_antecipada") {
@@ -421,6 +498,9 @@
             );
             alertaBarra.innerHTML = `<i class="fas fa-info-circle me-2"></i> ${data.barra_info.mensagem}`;
           }
+          
+          // Aplicar filtros após carregar os dados
+          applyTerminalFilters();
         })
         .catch((err) => {
           console.error("Erro ao atualizar dados:", err);
@@ -439,6 +519,24 @@
 
       // Salva a seleção no localStorage
       localStorage.setItem("terminalSelecionado", terminal);
+      
+      // Aplica os filtros (que podem não fazer nada se não for "todos")
+      applyTerminalFilters();
+    });
+
+    // Event listener para os checkboxes de filtro
+    document.querySelectorAll('.terminal-filter').forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        // Salva o estado dos filtros no localStorage
+        const filters = {};
+        document.querySelectorAll('.terminal-filter').forEach(cb => {
+          filters[cb.value] = cb.checked;
+        });
+        localStorage.setItem('terminalFilters', JSON.stringify(filters));
+        
+        // Aplica os filtros
+        applyTerminalFilters();
+      });
     });
 
     // Ao carregar a página, verifica se há uma seleção salva
@@ -448,6 +546,18 @@
 
       if (terminalSalvo) {
         selectElement.value = terminalSalvo;
+      }
+
+      // Carrega os filtros salvos
+      const savedFilters = localStorage.getItem('terminalFilters');
+      if (savedFilters) {
+        const filters = JSON.parse(savedFilters);
+        Object.keys(filters).forEach(terminal => {
+          const checkbox = document.querySelector(`.terminal-filter[value="${terminal}"]`);
+          if (checkbox) {
+            checkbox.checked = filters[terminal];
+          }
+        });
       }
 
       // Carrega os dados com o terminal selecionado sem mostrar loading
