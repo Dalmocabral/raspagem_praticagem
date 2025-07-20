@@ -565,10 +565,11 @@
     });
 
     // Atualização automática mantendo o terminal selecionado
-    setInterval(() => {
-      const terminal = document.getElementById("terminal-select").value;
-      atualizarTabela(terminal, false); // Não mostra loading nas atualizações automáticas
-    }, 600000); // 10 minutos
+   setInterval(() => {
+  const terminal = document.getElementById("terminal-select").value;
+  atualizarTabela(terminal, false); // Não mostra loading nas atualizações automáticas
+}, 300000); // 5 minutos
+
   </script>
 </body>
 
