@@ -52,9 +52,15 @@ def get_status_barra():
                     if "BARRA RESTRITA" in texto.upper():
                         # Retorna um dicionário indicando que a barra está restrita e a mensagem.
                         return {"restrita": True, "mensagem": texto}
+                    
+                     # Caso de barra restrita
+                    elif "BARRA FECHADA"in texto.upper():
+                        return {"restrita": True, "fechada": False, "mensagem": texto}
+                    # Caso normal
                     else:
                         # Retorna um dicionário indicando que a barra não está restrita e a mensagem.
                         return {"restrita": False, "mensagem": texto}
+                    
     except Exception as e:
         # Em caso de erro durante o processo, imprime uma mensagem de erro.
         print(f"Erro ao verificar status da barra: {e}")

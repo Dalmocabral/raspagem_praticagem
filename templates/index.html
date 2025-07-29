@@ -84,6 +84,14 @@
       border-left: 6px solid #43a047;
     }
 
+   .alerta-barra.fechada {
+  background-color: #f8d7da; /* vermelho mais forte */
+  color: #721c24;
+  border-left: 6px solid #dc3545;
+  font-weight: bold;
+}
+
+
     .blink-circle {
       width: 10px;
       height: 10px;
@@ -173,12 +181,12 @@
   </div>
   <div class="container my-4">
     {% if barra_info %}
-    <div class="alert alerta-barra text-center {{ 'restrita' if barra_info.restrita else 'aberta' }}">
-      <i class="fas fa-info-circle me-2"></i>
-      {{ barra_info.mensagem }}
-    </div>
-    {% endif %}
-
+  <div class="alert alerta-barra text-center 
+              {% if barra_info.fechada %}fechada{% elif barra_info.restrita %}restrita{% else %}aberta{% endif %}">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    {{ barra_info.mensagem }}
+  </div>
+{% endif %}
     <h3 class="text-center mb-4">
       NaviFlow
       <span class="material-icons" style="font-size: 36px; vertical-align: middle">directions_boat</span>
