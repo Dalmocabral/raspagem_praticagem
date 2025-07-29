@@ -511,6 +511,6 @@ if __name__ == "__main__":
     # port=port usa a porta definida anteriormente (variável de ambiente ou 5000).
     # debug=True ativa o modo de depuração, que recarrega o servidor automaticamente em mudanças e fornece informações de erro detalhadas.
     # ATENÇÃO: debug=True NÃO DEVE SER USADO EM AMBIENTE DE PRODUÇÃO por questões de segurança e performance.
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=port, debug=True)
 
 
