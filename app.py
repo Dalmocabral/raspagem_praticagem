@@ -1,10 +1,3 @@
-Claro! Entendi perfeitamente. Manter o código bem comentado é uma excelente prática para facilitar a manutenção no futuro.
-
-Incorporei os seus comentários originais de volta no código modificado. Também adicionei alguns comentários novos para explicar as partes que nós adicionamos, como o cache e a lógica para evitar repetição de código.
-
-Aqui está o `app.py` completo, com a documentação detalhada que você pediu:
-
-```python
 # Importa os módulos necessários para a aplicação Flask, requisições HTTP, parsing de HTML, manipulação de datas e variáveis de ambiente.
 from flask import Flask, render_template, jsonify, request
 from flask_caching import Cache  # Importa a biblioteca de cache
