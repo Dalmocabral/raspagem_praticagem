@@ -1,3 +1,27 @@
+"""
+INSTRUÇÕES PARA INICIAR O SERVIDOR:
+
+1. Instale as dependências (caso não estejam instaladas):
+   pip install -r requirements.txt
+
+2. Execute o servidor de acordo com o sistema operacional:
+
+   ### 🐧 Linux/Unix (Recomendado para produção):
+   gunicorn -w 4 -b 0.0.0.0:5000 app:app
+   (Onde 'app:app' significa: arquivo_app:variavel_flask)
+
+   ### 🪟 Windows (Waitress como alternativa ao Gunicorn):
+   waitress-serve --host=0.0.0.0 --port=5000 app:app
+
+   ### 💻 Modo de desenvolvimento (Flask embutido - qualquer OS):
+   python app.py
+
+Observações:
+- O Gunicorn não funciona nativamente no Windows (usa 'fcntl', exclusivo do Unix).
+- As bibliotecas já estão listadas no requirements.txt (Gunicorn/Waitress inclusos).
+"""
+
+
 # Importa os módulos necessários para a aplicação Flask, requisições HTTP, parsing de HTML, manipulação de datas e variáveis de ambiente.
 from flask import Flask, render_template, jsonify, request
 from flask_caching import Cache  # Importa a biblioteca de cache
