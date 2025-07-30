@@ -19,7 +19,7 @@ URL = "https://www.praticagem-rj.com.br/"
 # Estes berços são de interesse particular para a lógica de negócio.
 BERCOS_INCLUIR_TODOS = {
     'TECONTPROLONG', 'TECONT1', 'TECONT2', 'TECONT3', 'TECONT4', 'TECONT5', 
-    'MANGUINHOS', 'PG1'
+    'MANGUINHOS', 'PG-1'
 }
 
 # Função para obter o status da barra da Baía de Guanabara.
@@ -133,7 +133,7 @@ def get_all_navios_manobras():
                     current_terminal = "multi"
                 elif "MANGUINHOS" in becos:
                     current_terminal = "manguinhos"
-                elif "PG1" in becos:
+                elif "PG-1" in becos: # 
                     current_terminal = "pg1"
 
                 imo = None
@@ -511,6 +511,6 @@ if __name__ == "__main__":
     # port=port usa a porta definida anteriormente (variável de ambiente ou 5000).
     # debug=True ativa o modo de depuração, que recarrega o servidor automaticamente em mudanças e fornece informações de erro detalhadas.
     # ATENÇÃO: debug=True NÃO DEVE SER USADO EM AMBIENTE DE PRODUÇÃO por questões de segurança e performance.
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port, debug=False)
 
 
