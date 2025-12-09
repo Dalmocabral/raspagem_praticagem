@@ -68,29 +68,42 @@ def get_status_barra():
         # Cria um objeto BeautifulSoup para parsear o conteúdo HTML da resposta.
         soup = BeautifulSoup(response.text, "lxml")
 
-        # Procura por um elemento <span> que contenha o texto "BAIA DE GUANABARA" (case-insensitive).
-        baia_span = soup.find("span", string=re.compile(r"BAIA DE GUANABARA", re.I))
-        if baia_span:
-            # Encontra o elemento <tr> pai do <span>.
-            tr = baia_span.find_parent("tr")
-            if tr:
-                # Procura por um <div> dentro do <tr> com um ID que comece com "pnlBarra".
-                barra_div = tr.find("div", id=re.compile(r"pnlBarra\d+"))
-                if barra_div:
-                    # Extrai o texto do <div>, removendo espaços extras.
-                    texto = barra_div.get_text(separator=" ", strip=True)
-                    # Verifica se o texto contém "BARRA RESTRITA" ou "BARRA FECHADA".
-                    if "BARRA RESTRITA" in texto.upper():
-                        return {"restrita": True, "mensagem": texto}
-                    elif "BARRA FECHADA" in texto.upper():
-                        return {"restrita": True, "fechada": False, "mensagem": texto}
-                    else:
-                        return {"restrita": False, "mensagem": texto}
+        # --- Lógica de raspagem CORRIGIDA FINAL ---
+        # 1. Procura por todos os <td>.
+        all_tds = soup.find_all("td")
+        
+        baia_td = None
+        for td in all_tds:
+            # Verifica se o texto do <td> (removendo espaços) é exatamente "BAÍA DE GUANABARA"
+            if td.get_text(strip=True).upper() == "BAÍA DE GUANABARA":
+                baia_td = td
+                break
+        
+        if baia_td:
+            # 2. O status está no <td> seguinte (próximo irmão).
+            status_td = baia_td.find_next_sibling("td")
+            
+            if status_td:
+                # Extrai o texto do <td>, removendo espaços extras.
+                texto = status_td.get_text(separator=" ", strip=True)
+                
+                # Verifica se o texto contém "BARRA RESTRITA" ou "BARRA FECHADA".
+                if "BARRA RESTRITA" in texto.upper():
+                    return {"restrita": True, "mensagem": texto}
+                elif "BARRA FECHADA" in texto.upper():
+                    return {"restrita": True, "fechada": True, "mensagem": texto}
+                else:
+                    # Se não for restrita nem fechada, assume-se que está aberta.
+                    return {"restrita": False, "mensagem": texto}
+        # --- Fim da Lógica de raspagem CORRIGIDA FINAL ---
+
     except Exception as e:
         # Em caso de erro durante o processo, imprime uma mensagem de erro.
         print(f"Erro ao verificar status da barra: {e}")
+        
     # Se algo falhar, retorna um status padrão de não restrita com uma mensagem de erro.
     return {"restrita": False, "mensagem": "Não foi possível obter o status da barra."}
+
 
 
 # Função para obter todas as manobras de navios da página.
