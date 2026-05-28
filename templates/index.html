@@ -262,6 +262,7 @@
             <th class="sortable" onclick="sortTable(5)">Calado</th>
             <th class="sortable" onclick="sortTable(6)">Manobra</th>
             <th class="sortable" onclick="sortTable(7)">Beço</th>
+            <th>Live Traffic</th>
           </tr>
         </thead>
         <tbody>
@@ -306,6 +307,15 @@
               {% else %} {{ navio.manobra }} {% endif %}
             </td>
             <td>{{ navio.beco }}</td>
+            <td>
+              {% if navio.imo %}
+              <a href="https://www.marinetraffic.com/en/ais/details/ships/imo:{{ navio.imo }}" target="_blank" class="btn btn-sm btn-outline-primary" title="Ver no MarineTraffic" style="display: inline-flex; align-items: center; gap: 5px;">
+                <span class="material-icons" style="font-size: 16px;">map</span> Mapa
+              </a>
+              {% else %}
+              -
+              {% endif %}
+            </td>
           </tr>
           {% endfor %}
         </tbody>
@@ -491,6 +501,14 @@
               }
             </td>
             <td>${navio.beco}</td>
+            <td>
+              ${navio.imo 
+                ? `<a href="https://www.marinetraffic.com/en/ais/details/ships/imo:${navio.imo}" target="_blank" class="btn btn-sm btn-outline-primary" title="Ver no MarineTraffic" style="display: inline-flex; align-items: center; gap: 5px;">
+                     <span class="material-icons" style="font-size: 16px;">map</span> Mapa
+                   </a>`
+                : "-"
+              }
+            </td>
           `;
             tabela.appendChild(row);
           });

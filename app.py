@@ -129,40 +129,48 @@ def get_all_navios_manobras():
     if not main_table:
         print("Tabela principal de manobras não encontrada.")
         return []
-    # Encontra todas as linhas (<tr>) da tabela que representam manobras, usando um padrão de ID.
-    rows = main_table.find_all(
-        "tr", id=re.compile(r"rptAreas_ctl\d+_rptManobrasArea_ctl\d+_trManobraArea")
-    )
+    # --- MELHORIA: Busca dinâmica de colunas ---
+    # Encontra a linha de cabeçalho para mapear as posições das colunas dinamicamente
+    header_row = main_table.find("tr")
+    headers = [td.get_text(strip=True).upper() for td in header_row.find_all("td")] if header_row else []
+    
+    # Define índices padrão caso o cabeçalho não seja encontrado ou não corresponda ao esperado
+    idx_pob = headers.index("POB") if "POB" in headers else 0
+    idx_navio = headers.index("NAVIO") if "NAVIO" in headers else 1
+    idx_cal = headers.index("CAL") if "CAL" in headers else 2
+    idx_m = headers.index("M") if "M" in headers else 7
+    idx_de = headers.index("DE") if "DE" in headers else 8
+    idx_para = headers.index("PARA") if "PARA" in headers else 11
 
-    # Itera sobre cada linha de manobra encontrada.
+    # Busca TODAS as linhas da tabela em vez de usar Regex nos IDs (que podem mudar se o site atualizar)
+    rows = main_table.find_all("tr")
+
     for row in rows:
-        # Encontra todas as células (<td>) com a classe "tdManobraArea" dentro da linha.
+        # Busca células que contêm os dados (ignorando cabeçalhos etc)
         cols = row.find_all("td", class_="tdManobraArea")
-        # Garante que a linha tenha pelo menos 12 colunas para extração de dados.
-        if len(cols) >= 12:
+        
+        # Só processa a linha se tiver células suficientes baseadas no índice máximo necessário
+        if len(cols) > max(idx_pob, idx_navio, idx_cal, idx_m, idx_de, idx_para):
             try:
-                # Extrai a data e hora da primeira coluna.
-                data_hora = cols[0].get_text(strip=True)
-                # Extrai o nome do navio da segunda coluna.
-                navio_nome_div = cols[1].find("div", class_="tooltipDiv")
-                navio_nome = (
-                    navio_nome_div.contents[0].strip() if navio_nome_div else "N/A"
-                )
-                # Extrai o calado, manobra e berço de suas respectivas colunas.
-                calado = cols[2].get_text(strip=True)
-                manobra = cols[7].get_text(strip=True)
-                becos = (
-                    cols[8].get_text(strip=True)
-                    if cols[8].get_text(strip=True)
-                    else cols[11].get_text(strip=True)
-                )
+                # Extrai os dados usando os índices mapeados dinamicamente
+                data_hora = cols[idx_pob].get_text(strip=True)
+                
+                navio_nome_div = cols[idx_navio].find("div", class_="tooltipDiv")
+                navio_nome = navio_nome_div.contents[0].strip() if navio_nome_div else "N/A"
+                
+                calado = cols[idx_cal].get_text(strip=True)
+                manobra = cols[idx_m].get_text(strip=True)
+                
+                beco_de = cols[idx_de].get_text(strip=True)
+                beco_para = cols[idx_para].get_text(strip=True)
+                becos = beco_de if beco_de else beco_para
 
-                # Verifica se o navio está em algum dos berços de interesse definidos em BERCOS_INCLUIR_TODOS.
+                # Verifica se o navio está em algum dos berços de interesse
                 tem_berco_interesse = any(berco in becos for berco in BERCOS_INCLUIR_TODOS)
                 if not tem_berco_interesse:
-                    continue  # Ignora navios que não estão nos berços de interesse.
+                    continue
                 
-                # Classifica o terminal com base nos berços encontrados.
+                # Classifica o terminal com base nos berços encontrados
                 current_terminal = None
                 if "TECONTPROLONG" in becos or "TECONT1" in becos:
                     current_terminal = "rio"
@@ -173,14 +181,20 @@ def get_all_navios_manobras():
                 elif "PG-1" in becos:
                     current_terminal = "pg1"
 
-                # Procura por informações adicionais (IMO, tipo de navio) em um <div> de tooltip escondida.
+                # --- MELHORIA: Extração resiliente de IMO e Tipo de Navio ---
                 imo, tipo_navio = None, None
-                tooltip_escondida = cols[1].find("div", class_="tooltipDivEscondida")
+                tooltip_escondida = cols[idx_navio].find("div", class_="tooltipDivEscondida")
                 if tooltip_escondida:
-                    imo_span = tooltip_escondida.find("span", id="ST_NR_IMO")
-                    if imo_span: imo = imo_span.get_text(strip=True)
-                    tipo_navio_span = tooltip_escondida.find("span", id="DS_TIPO_NAVIO")
-                    if tipo_navio_span: tipo_navio = tipo_navio_span.get_text(strip=True).split("(")[0].strip()
+                    # Busca por texto "IMO" em células para evitar dependência de IDs exatos
+                    todas_tds_tooltip = tooltip_escondida.find_all("td")
+                    for t in todas_tds_tooltip:
+                        texto_td = t.get_text(strip=True).upper()
+                        if texto_td == "IMO":
+                            proxima_td = t.find_next_sibling("td")
+                            if proxima_td: imo = proxima_td.get_text(strip=True)
+                        elif texto_td == "TIPO":
+                            proxima_td = t.find_next_sibling("td")
+                            if proxima_td: tipo_navio = proxima_td.get_text(strip=True).split("(")[0].strip()
                 
                 # Normaliza o formato da data e hora.
                 data, hora = data_hora.split()
@@ -400,6 +414,5 @@ def api_navios():
 # Em um ambiente de produção, um servidor WSGI como Gunicorn ou Waitress
 # será responsável por importar a variável 'app' e iniciar o servidor.
 # Não se deve usar `app.run(debug=True)` em produção.
-#if __name__ == "__main__":
-   
-    #app.run(host="0.0.0.0", port=port, debug=False)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=port, debug=True)
