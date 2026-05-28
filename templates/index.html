@@ -171,6 +171,60 @@
       margin-left: 5px;
       vertical-align: middle;
     }
+
+    /* Dark Mode (baseado no praticagem_dashboard) */
+    [data-bs-theme="dark"] {
+      --bs-body-bg: #0f172a;
+      --bs-body-color: #f1f5f9;
+      --bs-table-bg: #1e293b;
+      --bs-table-color: #f1f5f9;
+      --bs-table-striped-bg: rgba(255, 255, 255, 0.02);
+      --bs-table-hover-bg: rgba(30, 41, 59, 0.8);
+      --bs-table-border-color: #334155;
+    }
+    [data-bs-theme="dark"] .table-primary {
+      --bs-table-bg: rgba(15, 23, 42, 0.5);
+      --bs-table-color: #94a3b8;
+    }
+    [data-bs-theme="dark"] #last-update {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      color: #94a3b8;
+    }
+    [data-bs-theme="dark"] .sortable.asc::after,
+    [data-bs-theme="dark"] .sortable.desc::after {
+      color: #3b82f6;
+    }
+    [data-bs-theme="dark"] .loading-overlay {
+      background-color: rgba(15, 23, 42, 0.8);
+    }
+    [data-bs-theme="dark"] .text-bg-success {
+      background-color: rgba(34, 197, 94, 0.1) !important;
+      color: #22c55e !important;
+    }
+    [data-bs-theme="dark"] .text-bg-danger {
+      background-color: rgba(239, 68, 68, 0.1) !important;
+      color: #ef4444 !important;
+    }
+    [data-bs-theme="dark"] .text-bg-warning {
+      background-color: rgba(139, 92, 246, 0.1) !important;
+      color: #8b5cf6 !important;
+    }
+    [data-bs-theme="dark"] .alerta-barra.aberta {
+      background-color: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+      border-left: 6px solid #22c55e;
+    }
+    [data-bs-theme="dark"] .alerta-barra.restrita {
+      background-color: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border-left: 6px solid #ef4444;
+    }
+    [data-bs-theme="dark"] .alerta-barra.fechada {
+      background-color: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border-left: 6px solid #ef4444;
+    }
   </style>
 </head>
 
@@ -246,6 +300,13 @@
             </li>
           </ul>
         </div>
+      </div>
+      
+      <!-- Theme Toggle Button -->
+      <div>
+        <button id="theme-toggle" class="btn btn-sm btn-outline-secondary" title="Alternar Modo Escuro">
+          <span class="material-icons" style="font-size: 18px; vertical-align: middle;">dark_mode</span>
+        </button>
       </div>
     </div>
 
@@ -595,6 +656,30 @@
   const terminal = document.getElementById("terminal-select").value;
   atualizarTabela(terminal, false); // Não mostra loading nas atualizações automáticas
 }, 300000); // 5 minutos
+
+    // --- Dark Mode Logic ---
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeIcon = themeToggleBtn.querySelector('.material-icons');
+    
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-bs-theme', theme);
+      localStorage.setItem('theme', theme);
+      if (theme === 'dark') {
+        themeIcon.textContent = 'light_mode';
+      } else {
+        themeIcon.textContent = 'dark_mode';
+      }
+    }
+
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+
+    themeToggleBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme);
+    });
 
   </script>
 </body>
