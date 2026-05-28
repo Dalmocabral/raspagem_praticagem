@@ -350,7 +350,7 @@
             <td>{{ navio.navio }}</td>
             <td>{{ navio.imo if navio.imo else '-' }}</td>
             <td>
-              <div class="tipo-icon">
+              <div class="tipo-icon justify-content-center">
                 {% if navio.icone %}
                 <img src="{{ navio.icone }}" alt="Ícone" />
                 {% endif %} {{ navio.tipo_navio if navio.tipo_navio else '-'
@@ -543,12 +543,14 @@
             <td>${alertaHTML} ${navio.hora}</td>
             <td>${navio.navio} </td>
             <td>${navio.imo || "-"}</td>
-            <td class="tipo-icon">
-              ${navio.icone
-                ? `<img src="${navio.icone}" alt="Ícone" width="30" height="30">`
-                : ""
-              }
-              ${navio.tipo_navio || "-"}
+            <td>
+              <div class="tipo-icon justify-content-center">
+                ${navio.icone
+                  ? `<img src="${navio.icone}" alt="Ícone" width="30" height="30">`
+                  : ""
+                }
+                ${navio.tipo_navio || "-"}
+              </div>
             </td>
             <td>${navio.calado}</td>
             <td>
