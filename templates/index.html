@@ -225,6 +225,85 @@
       color: #ef4444;
       border-left: 6px solid #ef4444;
     }
+    /* Glassmorphism no Cabeçalho e Tabela com Scroll */
+    .table-responsive {
+      max-height: 75vh;
+      overflow-y: auto;
+    }
+    .table-responsive thead th {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      background-color: rgba(207, 226, 255, 0.9) !important; /* Azul claro padrão */
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    [data-bs-theme="dark"] .table-responsive thead th {
+      background-color: rgba(15, 23, 42, 0.85) !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    /* Animação suave para as linhas */
+    @keyframes fadeInRow {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    #navios-table tbody tr {
+      animation: fadeInRow 0.3s ease-out forwards;
+    }
+
+    /* --- Responsividade Avançada (Mobile First) --- */
+    @media (max-width: 768px) {
+      .table-responsive {
+        max-height: none;
+        overflow: visible;
+        border: none;
+      }
+      #navios-table { display: block; }
+      #navios-table thead { display: none; } /* Oculta cabeçalho */
+      #navios-table tbody { display: flex; flex-direction: column; gap: 12px; }
+      #navios-table tr {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid rgba(0,0,0,0.1);
+        border-radius: 12px;
+        background-color: var(--bs-body-bg);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        padding: 8px;
+      }
+      [data-bs-theme="dark"] #navios-table tr {
+        border-color: #334155;
+        background-color: #1e293b;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      }
+      #navios-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 10px 8px;
+        text-align: right !important;
+      }
+      [data-bs-theme="dark"] #navios-table td { border-bottom-color: rgba(255,255,255,0.05); }
+      #navios-table td:last-child { border-bottom: none; }
+      #navios-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        text-align: left;
+        color: var(--bs-secondary-color);
+        margin-right: 15px;
+      }
+      #navios-table td .tipo-icon { justify-content: flex-end !important; }
+      
+      .d-flex.justify-content-between.align-items-center {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch !important;
+      }
+      .d-flex.align-items-center { flex-direction: column; align-items: stretch !important; gap: 10px;}
+      #theme-toggle { align-self: flex-end; }
+    }
   </style>
 </head>
 
@@ -329,14 +408,14 @@
         <tbody>
           {% for navio in navios %}
           <tr class="{{ navio.status }}" data-terminal="{{ navio.terminal }}">
-            <td>
+            <td data-label="Alerta">
               {% if navio.conflito_porterne %}
               <img src="https://i.ibb.co/m5yy049q/portane.png" alt="Conflito Portêner" class="porterne-icon"
                 title="Possível conflito levamtamento de lança do portêner" />
               {% endif %}
             </td>
-            <td>{{ navio.data }}</td>
-            <td>
+            <td data-label="Data">{{ navio.data }}</td>
+            <td data-label="Hora">
               {% if navio.alerta == 'entrada_antecipada' %}
               <span class="blink-circle blink-orange"></span>
               {% elif navio.alerta == 'entrada_futura' %}
@@ -347,9 +426,9 @@
               <span class="blink-circle blink-red"></span>
               {% endif %} {{ navio.hora }}
             </td>
-            <td>{{ navio.navio }}</td>
-            <td>{{ navio.imo if navio.imo else '-' }}</td>
-            <td>
+            <td data-label="Navio">{{ navio.navio }}</td>
+            <td data-label="IMO">{{ navio.imo if navio.imo else '-' }}</td>
+            <td data-label="Tipo">
               <div class="tipo-icon justify-content-center">
                 {% if navio.icone %}
                 <img src="{{ navio.icone }}" alt="Ícone" />
@@ -357,8 +436,8 @@
                 }}
               </div>
             </td>
-            <td>{{ navio.calado }}</td>
-            <td>
+            <td data-label="Calado">{{ navio.calado }}</td>
+            <td data-label="Manobra">
               {% if navio.manobra == "E" %}
               <span class="badge rounded-pill text-bg-success">ENTRADA</span>
               {% elif navio.manobra == "S" %}
@@ -367,8 +446,8 @@
               <span class="badge rounded-pill text-bg-warning">MUDANÇA</span>
               {% else %} {{ navio.manobra }} {% endif %}
             </td>
-            <td>{{ navio.beco }}</td>
-            <td>
+            <td data-label="Beço">{{ navio.beco }}</td>
+            <td data-label="Live Traffic">
               {% if navio.imo %}
               <a href="https://www.marinetraffic.com/en/ais/details/ships/imo:{{ navio.imo }}" target="_blank" class="btn btn-sm btn-outline-primary" title="Ver no MarineTraffic" style="display: inline-flex; align-items: center; gap: 5px;">
                 <span class="material-icons" style="font-size: 16px;">map</span> Mapa
@@ -546,12 +625,12 @@
             }
 
             row.innerHTML = `
-            <td>${porterneIconHTML}</td>
-            <td>${navio.data}</td>
-            <td>${alertaHTML} ${navio.hora}</td>
-            <td>${navio.navio} </td>
-            <td>${navio.imo || "-"}</td>
-            <td>
+            <td data-label="Alerta">${porterneIconHTML}</td>
+            <td data-label="Data">${navio.data}</td>
+            <td data-label="Hora">${alertaHTML} ${navio.hora}</td>
+            <td data-label="Navio">${navio.navio} </td>
+            <td data-label="IMO">${navio.imo || "-"}</td>
+            <td data-label="Tipo">
               <div class="tipo-icon justify-content-center">
                 ${navio.icone
                   ? `<img src="${navio.icone}" alt="Ícone" width="30" height="30">`
@@ -560,8 +639,8 @@
                 ${navio.tipo_navio || "-"}
               </div>
             </td>
-            <td>${navio.calado}</td>
-            <td>
+            <td data-label="Calado">${navio.calado}</td>
+            <td data-label="Manobra">
               ${navio.manobra === "E"
                 ? '<span class="badge rounded-pill text-bg-success">ENTRADA</span>'
                 : navio.manobra === "S"
@@ -571,8 +650,8 @@
                     : navio.manobra
               }
             </td>
-            <td>${navio.beco}</td>
-            <td>
+            <td data-label="Beço">${navio.beco}</td>
+            <td data-label="Live Traffic">
               ${navio.imo 
                 ? `<a href="https://www.marinetraffic.com/en/ais/details/ships/imo:${navio.imo}" target="_blank" class="btn btn-sm btn-outline-primary" title="Ver no MarineTraffic" style="display: inline-flex; align-items: center; gap: 5px;">
                      <span class="material-icons" style="font-size: 16px;">map</span> Mapa
