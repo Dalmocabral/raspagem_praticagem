@@ -336,6 +336,7 @@
             <option value="multi" {% if terminal_selecionado=='multi' %}selected{% endif %}>Multiterminais</option>
             <option value="manguinhos" {% if terminal_selecionado=='manguinhos' %}selected{% endif %}>Manguinhos</option>
             <option value="pg1" {% if terminal_selecionado=='pg1' %}selected{% endif %}>PG1</option>
+            <option value="visita" {% if terminal_selecionado=='visita' %}selected{% endif %}>Visita</option>
           </select>
         </div>
         
@@ -369,15 +370,23 @@
                 </label>
               </div>
             </li>
-            <li class="dropdown-item">
-              <div class="form-check">
-                <input class="form-check-input terminal-filter" type="checkbox" value="pg1" id="filter-pg1" checked>
-                <label class="form-check-label" for="filter-pg1">
-                  PG1
-                </label>
-              </div>
-            </li>
-          </ul>
+              <li class="px-3 py-1">
+                <div class="form-check">
+                  <input class="form-check-input terminal-filter" type="checkbox" value="pg1" id="filter-pg1" checked>
+                  <label class="form-check-label" for="filter-pg1">
+                    PG1
+                  </label>
+                </div>
+              </li>
+              <li class="px-3 py-1">
+                <div class="form-check">
+                  <input class="form-check-input terminal-filter" type="checkbox" value="visita" id="filter-visita" checked>
+                  <label class="form-check-label" for="filter-visita">
+                    Visita
+                  </label>
+                </div>
+              </li>
+            </ul>
         </div>
       </div>
       

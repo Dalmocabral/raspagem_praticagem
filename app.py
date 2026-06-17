@@ -52,7 +52,7 @@ URL = "https://www.praticagem-rj.com.br/"
 # Estes berços são de interesse particular para a lógica de negócio.
 BERCOS_INCLUIR_TODOS = {
     'TECONTPROLONG', 'TECONT1', 'TECONT2', 'TECONT3', 'TECONT4', 'TECONT5', 
-    'MANGUINHOS', 'PG-1'
+    'MANGUINHOS', 'PG-1', 'VISITA'
 }
 
 # Função para obter o status da barra da Baía de Guanabara.
@@ -163,7 +163,11 @@ def get_all_navios_manobras():
                 
                 beco_de = cols[idx_de].get_text(strip=True)
                 beco_para = cols[idx_para].get_text(strip=True)
-                becos = beco_de if beco_de else beco_para
+                
+                if beco_de and beco_para:
+                    becos = f"{beco_de} -> {beco_para}"
+                else:
+                    becos = beco_de if beco_de else beco_para
 
                 # Verifica se o navio está em algum dos berços de interesse
                 tem_berco_interesse = any(berco in becos for berco in BERCOS_INCLUIR_TODOS)
@@ -180,6 +184,8 @@ def get_all_navios_manobras():
                     current_terminal = "manguinhos"
                 elif "PG-1" in becos:
                     current_terminal = "pg1"
+                elif "VISITA" in becos:
+                    current_terminal = "visita"
 
                 # --- MELHORIA: Extração resiliente de IMO e Tipo de Navio ---
                 imo, tipo_navio = None, None
