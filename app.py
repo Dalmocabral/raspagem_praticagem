@@ -319,7 +319,16 @@ def processar_dados_e_conflitos():
     e de detecção de conflitos.
     """
     # Obtém todos os dados de manobras (virá do cache se disponível).
-    all_navios_data = get_all_navios_manobras()
+    all_navios_raw = get_all_navios_manobras()
+    
+    # Filtra navios de VISITA que não vão para/vem do terminal RIO
+    navios_do_rio = {n["navio"] for n in all_navios_raw if n["terminal"] == "rio"}
+    all_navios_data = []
+    for n in all_navios_raw:
+        if n["terminal"] != "visita":
+            all_navios_data.append(n)
+        elif n["terminal"] == "visita" and n["navio"] in navios_do_rio:
+            all_navios_data.append(n)
     
     # Filtra os navios por terminal para a detecção de conflitos.
     navios_rio = [n for n in all_navios_data if n["terminal"] == "rio"]
