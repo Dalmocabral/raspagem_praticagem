@@ -212,6 +212,9 @@ def get_all_navios_manobras():
                 hora_part, minuto_part = map(int, hora.split(":"))
                 hoje = datetime.now()
                 navio_date = datetime(hoje.year, mes, dia, hora_part, minuto_part)
+                
+                dias_semana = ["seg", "ter", "qua", "qui", "sex", "sab", "dom"]
+                data = f"{dias_semana[navio_date.weekday()]}, {data}"
 
                 # Determina o status da manobra (futuro, hoje, passado).
                 status = "futuro"
