@@ -403,8 +403,7 @@
         <thead class="table-primary">
           <tr>
             <th class="sortable" onclick="sortTable(0)">Alerta</th>
-            <th class="sortable" onclick="sortTable(0)">Data</th>
-            <th class="sortable" onclick="sortTable(1)">Hora</th>
+            <th class="sortable" onclick="sortTable(0)">Data / Hora</th>
             <th class="sortable" onclick="sortTable(2)">Navio</th>
             <th class="sortable" onclick="sortTable(3)">IMO</th>
             <th class="sortable" onclick="sortTable(4)">Tipo</th>
@@ -423,17 +422,20 @@
                 title="Possível conflito levamtamento de lança do portêner" />
               {% endif %}
             </td>
-            <td data-label="Data">{{ navio.data }}</td>
-            <td data-label="Hora">
-              {% if navio.alerta == 'entrada_antecipada' %}
-              <span class="blink-circle blink-orange"></span>
-              {% elif navio.alerta == 'entrada_futura' %}
-              <span class="blink-circle blink-green"></span>
-              {% elif navio.alerta == 'saida_futura' %}
-              <span class="blink-circle blink-yellow"></span> {# Opcional #}
-              {% elif navio.alerta == 'saida_atrasada' %}
-              <span class="blink-circle blink-red"></span>
-              {% endif %} {{ navio.hora }}
+            <td data-label="Data / Hora">
+              <div>{{ navio.data }}</div>
+              <div style="font-size: 0.85em; text-transform: capitalize; color: #6c757d;">{{ navio.dia_semana }}</div>
+              <div>
+                {% if navio.alerta == 'entrada_antecipada' %}
+                <span class="blink-circle blink-orange"></span>
+                {% elif navio.alerta == 'entrada_futura' %}
+                <span class="blink-circle blink-green"></span>
+                {% elif navio.alerta == 'saida_futura' %}
+                <span class="blink-circle blink-yellow"></span> {# Opcional #}
+                {% elif navio.alerta == 'saida_atrasada' %}
+                <span class="blink-circle blink-red"></span>
+                {% endif %} {{ navio.hora }}
+              </div>
             </td>
             <td data-label="Navio">{{ navio.navio }}</td>
             <td data-label="IMO">{{ navio.imo if navio.imo else '-' }}</td>

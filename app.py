@@ -213,8 +213,8 @@ def get_all_navios_manobras():
                 hoje = datetime.now()
                 navio_date = datetime(hoje.year, mes, dia, hora_part, minuto_part)
                 
-                dias_semana = ["seg", "ter", "qua", "qui", "sex", "sab", "dom"]
-                data = f"{dias_semana[navio_date.weekday()]}, {data}"
+                dias_semana = ["segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo"]
+                dia_semana = dias_semana[navio_date.weekday()]
 
                 # Determina o status da manobra (futuro, hoje, passado).
                 status = "futuro"
@@ -241,7 +241,7 @@ def get_all_navios_manobras():
                 
                 # Adiciona os dados da manobra processada à lista.
                 navios_manobras.append({
-                    "data": data, "hora": hora, "navio": navio_nome, "calado": calado,
+                    "data": data, "dia_semana": dia_semana, "hora": hora, "navio": navio_nome, "calado": calado,
                     "manobra": manobra, "beco": becos, "status": status, "imo": imo,
                     "tipo_navio": tipo_navio, "icone": icone, "alerta": alerta,
                     "terminal": current_terminal, "navio_date_obj": navio_date,
