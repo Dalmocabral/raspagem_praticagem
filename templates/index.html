@@ -441,11 +441,26 @@
             <td data-label="Navio">{{ navio.navio }}</td>
             <td data-label="Serviço">
               {% if navio.servico %}
-              <span class="badge rounded-pill text-bg-{{ navio.servico_cor }}" 
-                    title="{{ navio.servico_armadores }}"
-                    style="font-size: 0.85em; cursor: help;">
-                {{ navio.servico }}
-              </span>
+              <div class="d-flex flex-column align-items-center gap-1">
+                <span class="badge rounded-pill text-bg-{{ navio.servico_cor }}" 
+                      title="{{ navio.servico_armadores }}"
+                      style="font-size: 0.85em; cursor: help;">
+                  {{ navio.servico }}
+                </span>
+                {% if navio.status_janela == 'NA_JANELA' %}
+                <span class="badge rounded-pill text-bg-success" 
+                      title="{{ navio.janela_texto }}" 
+                      style="font-size: 0.72em; cursor: help;">
+                  ● Na Janela
+                </span>
+                {% elif navio.status_janela == 'FORA_DA_JANELA' %}
+                <span class="badge rounded-pill text-bg-danger" 
+                      title="{{ navio.janela_texto }}" 
+                      style="font-size: 0.72em; cursor: help;">
+                  ▲ Fora da Janela
+                </span>
+                {% endif %}
+              </div>
               {% else %}
               <span class="text-muted">-</span>
               {% endif %}
@@ -636,12 +651,22 @@
 
             let servicoHTML = '<span class="text-muted">-</span>';
             if (navio.servico) {
+              let janelaBadge = '';
+              if (navio.status_janela === 'NA_JANELA') {
+                janelaBadge = `<span class="badge rounded-pill text-bg-success" title="${navio.janela_texto || ''}" style="font-size: 0.72em; cursor: help;">● Na Janela</span>`;
+              } else if (navio.status_janela === 'FORA_DA_JANELA') {
+                janelaBadge = `<span class="badge rounded-pill text-bg-danger" title="${navio.janela_texto || ''}" style="font-size: 0.72em; cursor: help;">▲ Fora da Janela</span>`;
+              }
+
               servicoHTML = `
-                <span class="badge rounded-pill text-bg-${navio.servico_cor || 'primary'}" 
-                      title="${navio.servico_armadores || ''}"
-                      style="font-size: 0.85em; cursor: help;">
-                  ${navio.servico}
-                </span>
+                <div class="d-flex flex-column align-items-center gap-1">
+                  <span class="badge rounded-pill text-bg-${navio.servico_cor || 'primary'}" 
+                        title="${navio.servico_armadores || ''}"
+                        style="font-size: 0.85em; cursor: help;">
+                    ${navio.servico}
+                  </span>
+                  ${janelaBadge}
+                </div>
               `;
             }
 
