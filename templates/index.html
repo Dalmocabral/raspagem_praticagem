@@ -441,16 +441,11 @@
             <td data-label="Navio">{{ navio.navio }}</td>
             <td data-label="Serviço">
               {% if navio.servico %}
-              <div>
-                <span class="badge rounded-pill text-bg-{{ navio.servico_cor }}" 
-                      title="{{ navio.servico_armadores }}"
-                      style="font-size: 0.85em; cursor: help;">
-                  {{ navio.servico }}
-                </span>
-                {% if navio.servico_viagem and navio.manobra == 'E' %}
-                <div class="text-muted" style="font-size: 0.75em;" title="Viagem">V. {{ navio.servico_viagem }}</div>
-                {% endif %}
-              </div>
+              <span class="badge rounded-pill text-bg-{{ navio.servico_cor }}" 
+                    title="{{ navio.servico_armadores }}"
+                    style="font-size: 0.85em; cursor: help;">
+                {{ navio.servico }}
+              </span>
               {% else %}
               <span class="text-muted">-</span>
               {% endif %}
@@ -641,16 +636,12 @@
 
             let servicoHTML = '<span class="text-muted">-</span>';
             if (navio.servico) {
-              const viagemHTML = (navio.servico_viagem && navio.manobra === "E") ? `<div class="text-muted" style="font-size: 0.75em;" title="Viagem">V. ${navio.servico_viagem}</div>` : '';
               servicoHTML = `
-                <div>
-                  <span class="badge rounded-pill text-bg-${navio.servico_cor || 'primary'}" 
-                        title="${navio.servico_armadores || ''}"
-                        style="font-size: 0.85em; cursor: help;">
-                    ${navio.servico}
-                  </span>
-                  ${viagemHTML}
-                </div>
+                <span class="badge rounded-pill text-bg-${navio.servico_cor || 'primary'}" 
+                      title="${navio.servico_armadores || ''}"
+                      style="font-size: 0.85em; cursor: help;">
+                  ${navio.servico}
+                </span>
               `;
             }
 
