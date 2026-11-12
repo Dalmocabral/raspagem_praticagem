@@ -432,7 +432,8 @@
     .badge-servico-box {
       display: inline-flex;
       align-items: center;
-      padding: 3px 8px;
+      justify-content: center;
+      padding: 3px 9px;
       font-size: 11.5px;
       font-weight: 600;
       border-radius: 4px;
@@ -440,21 +441,43 @@
       color: var(--text-main);
       border: 1px solid var(--border-strong);
       letter-spacing: 0.01em;
+      white-space: nowrap;
     }
-    .badge-servico-box.primary {
+    .badge-servico-box.primary,
+    .badge-servico-box.info {
       background-color: var(--info-bg);
       color: var(--info-text);
-      border-color: var(--info-border);
+      border: 1px solid var(--info-border);
     }
     .badge-servico-box.success {
       background-color: var(--success-bg);
       color: var(--success-text);
-      border-color: var(--success-border);
+      border: 1px solid var(--success-border);
     }
     .badge-servico-box.warning {
       background-color: var(--warning-bg);
       color: var(--warning-text);
-      border-color: var(--warning-border);
+      border: 1px solid var(--warning-border);
+    }
+    .badge-servico-box.danger {
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid var(--danger-border);
+    }
+    .badge-servico-box.secondary {
+      background-color: var(--bg-subtle);
+      color: var(--text-muted);
+      border: 1px solid var(--border-strong);
+    }
+    .badge-servico-box.dark {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      border: 1px solid #94a3b8;
+    }
+    [data-bs-theme="dark"] .badge-servico-box.dark {
+      background-color: #1e293b;
+      color: #f8fafc;
+      border: 1px solid #475569;
     }
 
     /* Live Traffic Button */
