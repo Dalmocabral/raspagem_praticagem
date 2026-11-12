@@ -447,7 +447,7 @@
                       style="font-size: 0.85em; cursor: help;">
                   {{ navio.servico }}
                 </span>
-                {% if navio.servico_viagem %}
+                {% if navio.servico_viagem and navio.manobra == 'E' %}
                 <div class="text-muted" style="font-size: 0.75em;" title="Viagem">V. {{ navio.servico_viagem }}</div>
                 {% endif %}
               </div>
@@ -641,7 +641,7 @@
 
             let servicoHTML = '<span class="text-muted">-</span>';
             if (navio.servico) {
-              const viagemHTML = navio.servico_viagem ? `<div class="text-muted" style="font-size: 0.75em;" title="Viagem">V. ${navio.servico_viagem}</div>` : '';
+              const viagemHTML = (navio.servico_viagem && navio.manobra === "E") ? `<div class="text-muted" style="font-size: 0.75em;" title="Viagem">V. ${navio.servico_viagem}</div>` : '';
               servicoHTML = `
                 <div>
                   <span class="badge rounded-pill text-bg-${navio.servico_cor || 'primary'}" 

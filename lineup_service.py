@@ -185,3 +185,4 @@ def enriquecer_navio_com_servico(navio_dict, lineup_map):
         navio_dict["servico_joint"] = None
 
     return navio_dict
+
