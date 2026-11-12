@@ -406,11 +406,12 @@
             <th class="sortable" onclick="sortTable(1)">Data / Hora</th>
             <th class="sortable" onclick="sortTable(2)">Navio</th>
             <th class="sortable" onclick="sortTable(3)">Serviço</th>
-            <th class="sortable" onclick="sortTable(4)">IMO</th>
-            <th class="sortable" onclick="sortTable(5)">Tipo</th>
-            <th class="sortable" onclick="sortTable(6)">Calado</th>
-            <th class="sortable" onclick="sortTable(7)">Manobra</th>
-            <th class="sortable" onclick="sortTable(8)">Beço</th>
+            <th class="sortable" onclick="sortTable(4)">Janela</th>
+            <th class="sortable" onclick="sortTable(5)">IMO</th>
+            <th class="sortable" onclick="sortTable(6)">Tipo</th>
+            <th class="sortable" onclick="sortTable(7)">Calado</th>
+            <th class="sortable" onclick="sortTable(8)">Manobra</th>
+            <th class="sortable" onclick="sortTable(9)">Beço</th>
             <th>Live Traffic</th>
           </tr>
         </thead>
@@ -441,26 +442,28 @@
             <td data-label="Navio">{{ navio.navio }}</td>
             <td data-label="Serviço">
               {% if navio.servico %}
-              <div class="d-flex flex-column align-items-center gap-1">
-                <span class="badge rounded-pill text-bg-{{ navio.servico_cor }}" 
-                      title="{{ navio.servico_armadores }}"
-                      style="font-size: 0.85em; cursor: help;">
-                  {{ navio.servico }}
-                </span>
-                {% if navio.status_janela == 'NA_JANELA' %}
-                <span class="badge rounded-pill text-bg-success" 
-                      title="{{ navio.janela_texto }}" 
-                      style="font-size: 0.72em; cursor: help;">
-                  ● Na Janela
-                </span>
-                {% elif navio.status_janela == 'FORA_DA_JANELA' %}
-                <span class="badge rounded-pill text-bg-danger" 
-                      title="{{ navio.janela_texto }}" 
-                      style="font-size: 0.72em; cursor: help;">
-                  ▲ Fora da Janela
-                </span>
-                {% endif %}
-              </div>
+              <span class="badge rounded-pill text-bg-{{ navio.servico_cor }}" 
+                    title="{{ navio.servico_armadores }}"
+                    style="font-size: 0.85em; cursor: help;">
+                {{ navio.servico }}
+              </span>
+              {% else %}
+              <span class="text-muted">-</span>
+              {% endif %}
+            </td>
+            <td data-label="Janela">
+              {% if navio.status_janela == 'NA_JANELA' %}
+              <span class="badge rounded-pill text-bg-success" 
+                    title="{{ navio.janela_texto }}" 
+                    style="font-size: 0.78em; cursor: help;">
+                ● Na Janela
+              </span>
+              {% elif navio.status_janela == 'FORA_DA_JANELA' %}
+              <span class="badge rounded-pill text-bg-danger" 
+                    title="{{ navio.janela_texto }}" 
+                    style="font-size: 0.78em; cursor: help;">
+                ▲ Fora da Janela
+              </span>
               {% else %}
               <span class="text-muted">-</span>
               {% endif %}
@@ -560,10 +563,10 @@
       const table = document.getElementById("navios-table");
       const tbody = table.tBodies[0];
       const rows = Array.from(tbody.querySelectorAll("tr"));
-      const headers = table.querySelectorAll("th.sortable");
+      const allHeaders = table.querySelectorAll("th");
 
       // Remove classes de ordenação de todos os cabeçalhos
-      headers.forEach((header) => {
+      allHeaders.forEach((header) => {
         header.classList.remove("asc", "desc");
       });
 
@@ -578,11 +581,13 @@
       }
 
       // Adiciona classe ao cabeçalho atual
-      headers[columnIndex].classList.add(currentSort.direction);
+      if (allHeaders[columnIndex]) {
+        allHeaders[columnIndex].classList.add(currentSort.direction);
+      }
 
       rows.sort((a, b) => {
-        const aText = a.cells[columnIndex].textContent.trim();
-        const bText = b.cells[columnIndex].textContent.trim();
+        const aText = a.cells[columnIndex] ? a.cells[columnIndex].textContent.trim() : "";
+        const bText = b.cells[columnIndex] ? b.cells[columnIndex].textContent.trim() : "";
 
         // Tratamento especial para Data / Hora (coluna 1)
         if (columnIndex === 1) {
@@ -595,8 +600,8 @@
           }
         }
 
-        // Tratamento especial para números (coluna 6 - Calado)
-        if (columnIndex === 6) {
+        // Tratamento especial para números (coluna 7 - Calado)
+        if (columnIndex === 7) {
           const numA = parseFloat(aText.replace(",", "."));
           const numB = parseFloat(bText.replace(",", "."));
 
@@ -651,23 +656,20 @@
 
             let servicoHTML = '<span class="text-muted">-</span>';
             if (navio.servico) {
-              let janelaBadge = '';
-              if (navio.status_janela === 'NA_JANELA') {
-                janelaBadge = `<span class="badge rounded-pill text-bg-success" title="${navio.janela_texto || ''}" style="font-size: 0.72em; cursor: help;">● Na Janela</span>`;
-              } else if (navio.status_janela === 'FORA_DA_JANELA') {
-                janelaBadge = `<span class="badge rounded-pill text-bg-danger" title="${navio.janela_texto || ''}" style="font-size: 0.72em; cursor: help;">▲ Fora da Janela</span>`;
-              }
-
               servicoHTML = `
-                <div class="d-flex flex-column align-items-center gap-1">
-                  <span class="badge rounded-pill text-bg-${navio.servico_cor || 'primary'}" 
-                        title="${navio.servico_armadores || ''}"
-                        style="font-size: 0.85em; cursor: help;">
-                    ${navio.servico}
-                  </span>
-                  ${janelaBadge}
-                </div>
+                <span class="badge rounded-pill text-bg-${navio.servico_cor || 'primary'}" 
+                      title="${navio.servico_armadores || ''}"
+                      style="font-size: 0.85em; cursor: help;">
+                  ${navio.servico}
+                </span>
               `;
+            }
+
+            let janelaHTML = '<span class="text-muted">-</span>';
+            if (navio.status_janela === 'NA_JANELA') {
+              janelaHTML = `<span class="badge rounded-pill text-bg-success" title="${navio.janela_texto || ''}" style="font-size: 0.78em; cursor: help;">● Na Janela</span>`;
+            } else if (navio.status_janela === 'FORA_DA_JANELA') {
+              janelaHTML = `<span class="badge rounded-pill text-bg-danger" title="${navio.janela_texto || ''}" style="font-size: 0.78em; cursor: help;">▲ Fora da Janela</span>`;
             }
 
             row.innerHTML = `
@@ -679,6 +681,7 @@
             </td>
             <td data-label="Navio">${navio.navio}</td>
             <td data-label="Serviço">${servicoHTML}</td>
+            <td data-label="Janela">${janelaHTML}</td>
             <td data-label="IMO">${navio.imo || "-"}</td>
             <td data-label="Tipo">
               <div class="tipo-icon justify-content-center">
