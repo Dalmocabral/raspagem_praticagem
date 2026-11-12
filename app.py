@@ -31,6 +31,7 @@ from datetime import datetime, timedelta
 import re
 import os
 from pytz import timezone
+from lineup_service import obter_lineup_rio_brasil, enriquecer_navio_com_servico
 
 # Define a porta do servidor. Tenta obter da variável de ambiente 'PORT', caso contrário, usa 5000 como padrão.
 port = int(os.environ.get("PORT", 5000))
@@ -44,6 +45,11 @@ cache = Cache(app, config={
     'CACHE_TYPE': 'SimpleCache',
     'CACHE_DEFAULT_TIMEOUT': 300
 })
+
+# Obtém o mapa de serviços do Lineup do Rio Brasil Terminal com cache em memória
+@cache.cached(timeout=300, key_prefix='lineup_rio_brasil')
+def get_cached_lineup():
+    return obter_lineup_rio_brasil()
 
 # URL base do site de onde os dados serão extraídos (scraping).
 URL = "https://www.praticagem-rj.com.br/"
@@ -354,6 +360,14 @@ def processar_dados_e_conflitos():
                     navios_com_porterne_marcado[navio_nome] = manobra_afetada
                     break
                     
+    # Enriquece navios do Terminal Rio Brasil com informações do serviço marítimo do Lineup
+    try:
+        lineup_map = get_cached_lineup()
+        for n in all_navios_data:
+            enriquecer_navio_com_servico(n, lineup_map)
+    except Exception as e:
+        print(f"Erro ao enriquecer dados com lineup: {e}")
+
     return all_navios_data, conflitos_encontrados
 
 

@@ -405,11 +405,12 @@
             <th>Alerta</th>
             <th class="sortable" onclick="sortTable(1)">Data / Hora</th>
             <th class="sortable" onclick="sortTable(2)">Navio</th>
-            <th class="sortable" onclick="sortTable(3)">IMO</th>
-            <th class="sortable" onclick="sortTable(4)">Tipo</th>
-            <th class="sortable" onclick="sortTable(5)">Calado</th>
-            <th class="sortable" onclick="sortTable(6)">Manobra</th>
-            <th class="sortable" onclick="sortTable(7)">Beço</th>
+            <th class="sortable" onclick="sortTable(3)">Serviço</th>
+            <th class="sortable" onclick="sortTable(4)">IMO</th>
+            <th class="sortable" onclick="sortTable(5)">Tipo</th>
+            <th class="sortable" onclick="sortTable(6)">Calado</th>
+            <th class="sortable" onclick="sortTable(7)">Manobra</th>
+            <th class="sortable" onclick="sortTable(8)">Beço</th>
             <th>Live Traffic</th>
           </tr>
         </thead>
@@ -438,6 +439,22 @@
               </div>
             </td>
             <td data-label="Navio">{{ navio.navio }}</td>
+            <td data-label="Serviço">
+              {% if navio.servico %}
+              <div>
+                <span class="badge rounded-pill text-bg-{{ navio.servico_cor }}" 
+                      title="{{ navio.servico_armadores }}"
+                      style="font-size: 0.85em; cursor: help;">
+                  {{ navio.servico }}
+                </span>
+                {% if navio.servico_viagem %}
+                <div class="text-muted" style="font-size: 0.75em;" title="Viagem">V. {{ navio.servico_viagem }}</div>
+                {% endif %}
+              </div>
+              {% else %}
+              <span class="text-muted">-</span>
+              {% endif %}
+            </td>
             <td data-label="IMO">{{ navio.imo if navio.imo else '-' }}</td>
             <td data-label="Tipo">
               <div class="tipo-icon justify-content-center">
@@ -568,8 +585,8 @@
           }
         }
 
-        // Tratamento especial para números (coluna 5 - Calado)
-        if (columnIndex === 5) {
+        // Tratamento especial para números (coluna 6 - Calado)
+        if (columnIndex === 6) {
           const numA = parseFloat(aText.replace(",", "."));
           const numB = parseFloat(bText.replace(",", "."));
 
@@ -622,6 +639,21 @@
               porterneIconHTML = '<img src="https://i.ibb.co/m5yy049q/portane.png" alt="Conflito Portêner" class="porterne-icon" title="Possível necessidade de levantar lança do portêiner" />';
             }
 
+            let servicoHTML = '<span class="text-muted">-</span>';
+            if (navio.servico) {
+              const viagemHTML = navio.servico_viagem ? `<div class="text-muted" style="font-size: 0.75em;" title="Viagem">V. ${navio.servico_viagem}</div>` : '';
+              servicoHTML = `
+                <div>
+                  <span class="badge rounded-pill text-bg-${navio.servico_cor || 'primary'}" 
+                        title="${navio.servico_armadores || ''}"
+                        style="font-size: 0.85em; cursor: help;">
+                    ${navio.servico}
+                  </span>
+                  ${viagemHTML}
+                </div>
+              `;
+            }
+
             row.innerHTML = `
             <td data-label="Alerta">${porterneIconHTML}</td>
             <td data-label="Data / Hora">
@@ -630,6 +662,7 @@
               <div>${alertaHTML} ${navio.hora}</div>
             </td>
             <td data-label="Navio">${navio.navio}</td>
+            <td data-label="Serviço">${servicoHTML}</td>
             <td data-label="IMO">${navio.imo || "-"}</td>
             <td data-label="Tipo">
               <div class="tipo-icon justify-content-center">
