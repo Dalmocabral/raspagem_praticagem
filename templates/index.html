@@ -309,14 +309,29 @@
       color: var(--text-primary);
       border-top: none;
       border-bottom: 1px solid var(--border-subtle);
-      background-color: transparent !important;
       transition: background-color 0.15s ease;
     }
     #navios-table tbody tr {
       transition: background-color 0.15s ease;
     }
+    /* Linhas alternadas (Zebra striping / linha cinzentada) */
+    #navios-table tbody tr:nth-child(even) td {
+      background-color: #f4f6f9;
+    }
+    #navios-table tbody tr:nth-child(odd) td {
+      background-color: #ffffff;
+    }
+    [data-bs-theme="dark"] #navios-table tbody tr:nth-child(even) td {
+      background-color: rgba(255, 255, 255, 0.035);
+    }
+    [data-bs-theme="dark"] #navios-table tbody tr:nth-child(odd) td {
+      background-color: transparent;
+    }
     #navios-table tbody tr:hover td {
-      background-color: var(--hover-row) !important;
+      background-color: rgba(0, 113, 227, 0.06) !important;
+    }
+    [data-bs-theme="dark"] #navios-table tbody tr:hover td {
+      background-color: rgba(255, 255, 255, 0.08) !important;
     }
     #navios-table tbody tr:last-child td {
       border-bottom: none;
