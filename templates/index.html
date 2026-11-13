@@ -4,346 +4,316 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>NaviFlow • Inteligência Portuária RJ</title>
+  <title>NaviFlow • Monitoramento de Escalas Portuárias</title>
   
-  <!-- Professional Fonts & Google Material Icons -->
+  <!-- Apple-grade Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 
   <style>
     /* ============================================================
-       ENTERPRISE MARITIME DESIGN SYSTEM (Clean, Elegant, Executive)
+       APPLE-STYLE DESIGN SYSTEM (Cupertino / SF Pro Aesthetic)
        ============================================================ */
     :root {
-      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Plus Jakarta Sans", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      
+      /* Light Theme Colors (Clean Off-White Canvas) */
+      --bg-page: #f5f5f7;
+      --card-bg: #ffffff;
+      --card-bg-elevated: #ffffff;
+      --header-glass: rgba(255, 255, 255, 0.85);
+      --border-color: rgba(0, 0, 0, 0.07);
+      --border-subtle: rgba(0, 0, 0, 0.04);
+      --text-primary: #1d1d1f;
+      --text-secondary: #86868b;
+      --hover-row: rgba(0, 113, 227, 0.035);
 
-      /* Enterprise Light (Slate & Crisp White) */
-      --bg-app: #f8fafc;
-      --bg-surface: #ffffff;
-      --bg-subtle: #f1f5f9;
-      --border-subtle: #e2e8f0;
-      --border-strong: #cbd5e1;
+      /* Apple System Tint Accents */
+      --apple-blue: #0071e3;
+      --apple-blue-tint: rgba(0, 113, 227, 0.08);
+      --apple-blue-border: rgba(0, 113, 227, 0.22);
+      
+      --apple-green: #248a3d;
+      --apple-green-tint: rgba(52, 199, 89, 0.12);
+      --apple-green-border: rgba(52, 199, 89, 0.25);
+      
+      --apple-red: #d70015;
+      --apple-red-tint: rgba(255, 59, 48, 0.12);
+      --apple-red-border: rgba(255, 59, 48, 0.25);
+      
+      --apple-orange: #b25000;
+      --apple-orange-tint: rgba(255, 149, 0, 0.12);
+      --apple-orange-border: rgba(255, 149, 0, 0.25);
 
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --text-subtle: #94a3b8;
+      --apple-purple: #8944ab;
+      --apple-purple-tint: rgba(175, 82, 222, 0.12);
+      --apple-purple-border: rgba(175, 82, 222, 0.25);
 
-      --brand-primary: #0284c7;
-      --brand-primary-light: #e0f2fe;
+      --apple-cyan: #007799;
+      --apple-cyan-tint: rgba(50, 173, 230, 0.12);
+      --apple-cyan-border: rgba(50, 173, 230, 0.25);
 
-      /* Operational Status Colors */
-      --success-bg: #ecfdf5;
-      --success-text: #047857;
-      --success-border: #a7f3d0;
-
-      --danger-bg: #fef2f2;
-      --danger-text: #b91c1c;
-      --danger-border: #fecaca;
-
-      --warning-bg: #fffbeb;
-      --warning-text: #b45309;
-      --warning-border: #fde68a;
-
-      --info-bg: #f0f9ff;
-      --info-text: #0369a1;
-      --info-border: #bae6fd;
-
-      --hover-row: #f8fafc;
-      --header-bg: #f8fafc;
-
-      --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
-      --shadow-dropdown: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+      /* Apple Multi-Layer Soft Shadows */
+      --shadow-pill: 0 2px 8px -1px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+      --shadow-card: 0 12px 36px -4px rgba(0, 0, 0, 0.06), 0 4px 14px -2px rgba(0, 0, 0, 0.03);
+      --shadow-dropdown: 0 20px 44px -8px rgba(0, 0, 0, 0.12), 0 8px 18px -4px rgba(0, 0, 0, 0.05);
     }
 
     [data-bs-theme="dark"] {
-      /* Enterprise Dark (Executive Deep Navy & Obsidian) */
-      --bg-app: #0b0f19;
-      --bg-surface: #111827;
-      --bg-subtle: #1f2937;
-      --border-subtle: #1f2937;
-      --border-strong: #374151;
+      /* Dark Theme (OLED Dark Canvas & Refined Glass Surfaces) */
+      --bg-page: #000000;
+      --card-bg: #1c1c1e;
+      --card-bg-elevated: #2c2c2e;
+      --header-glass: rgba(28, 28, 30, 0.88);
+      --border-color: rgba(255, 255, 255, 0.1);
+      --border-subtle: rgba(255, 255, 255, 0.05);
+      --text-primary: #f5f5f7;
+      --text-secondary: #a1a1a6;
+      --hover-row: rgba(255, 255, 255, 0.035);
 
-      --text-main: #f9fafb;
-      --text-muted: #9ca3af;
-      --text-subtle: #6b7280;
+      --apple-blue: #2997ff;
+      --apple-blue-tint: rgba(41, 151, 255, 0.16);
+      --apple-blue-border: rgba(41, 151, 255, 0.3);
 
-      --brand-primary: #38bdf8;
-      --brand-primary-light: rgba(56, 189, 248, 0.15);
+      --apple-green: #30d158;
+      --apple-green-tint: rgba(48, 209, 88, 0.16);
+      --apple-green-border: rgba(48, 209, 88, 0.3);
 
-      --success-bg: rgba(6, 78, 59, 0.45);
-      --success-text: #34d399;
-      --success-border: #065f46;
+      --apple-red: #ff453a;
+      --apple-red-tint: rgba(255, 69, 58, 0.16);
+      --apple-red-border: rgba(255, 69, 58, 0.3);
 
-      --danger-bg: rgba(127, 29, 29, 0.45);
-      --danger-text: #f87171;
-      --danger-border: #991b1b;
+      --apple-orange: #ff9f0a;
+      --apple-orange-tint: rgba(255, 159, 10, 0.16);
+      --apple-orange-border: rgba(255, 159, 10, 0.3);
 
-      --warning-bg: rgba(120, 53, 15, 0.45);
-      --warning-text: #fbbf24;
-      --warning-border: #92400e;
+      --apple-purple: #bf5af2;
+      --apple-purple-tint: rgba(191, 90, 242, 0.16);
+      --apple-purple-border: rgba(191, 90, 242, 0.3);
 
-      --info-bg: rgba(12, 74, 110, 0.45);
-      --info-text: #38bdf8;
-      --info-border: #0369a1;
+      --apple-cyan: #64d2ff;
+      --apple-cyan-tint: rgba(100, 210, 255, 0.16);
+      --apple-cyan-border: rgba(100, 210, 255, 0.3);
 
-      --hover-row: #1a2234;
-      --header-bg: #131c2e;
-
-      --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
-      --shadow-dropdown: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
+      --shadow-pill: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      --shadow-card: 0 16px 48px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      --shadow-dropdown: 0 24px 54px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.12);
     }
 
-    /* Base Styling */
+    /* Base Page Styling */
     body {
-      font-family: var(--font-sans);
-      background-color: var(--bg-app);
-      color: var(--text-main);
+      font-family: var(--font-apple);
+      background-color: var(--bg-page);
+      color: var(--text-primary);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      transition: background-color 0.3s ease, color 0.3s ease;
       min-height: 100vh;
-      margin: 0;
     }
 
-    /* Enterprise Navigation Header */
-    .enterprise-navbar {
-      background-color: var(--bg-surface);
-      border-bottom: 1px solid var(--border-subtle);
-      padding: 12px 24px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .nav-inner {
-      max-width: 1500px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    /* Brand Logo & Title */
-    .brand-section {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .brand-icon-box {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      background-color: var(--brand-primary-light);
-      color: var(--brand-primary);
+    /* App Header */
+    .apple-logo-badge {
+      width: 50px;
+      height: 50px;
+      border-radius: 15px;
+      background: linear-gradient(145deg, #0071e3 0%, #0056b3 100%);
+      color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 8px 22px -3px rgba(0, 113, 227, 0.38);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
     }
-    .brand-title {
-      font-size: 17px;
+    .apple-logo-badge:hover {
+      transform: scale(1.06);
+      box-shadow: 0 10px 26px -2px rgba(0, 113, 227, 0.48);
+    }
+    .apple-title {
+      font-size: 29px;
       font-weight: 700;
-      color: var(--text-main);
-      letter-spacing: -0.02em;
-      line-height: 1.2;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      letter-spacing: -0.035em;
+      color: var(--text-primary);
+      margin-top: 10px;
+      margin-bottom: 2px;
     }
-    .brand-badge {
-      font-size: 11px;
-      font-weight: 600;
-      background-color: var(--bg-subtle);
-      color: var(--text-muted);
-      border: 1px solid var(--border-subtle);
-      border-radius: 4px;
-      padding: 2px 6px;
-      letter-spacing: 0;
-    }
-    .brand-subtitle {
-      font-size: 12px;
-      color: var(--text-muted);
+    .apple-subtitle {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
       font-weight: 400;
     }
 
-    /* Navbar Right Controls */
-    .controls-section {
+    /* Live Update Status Pill */
+    .apple-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+      padding: 6px 18px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      box-shadow: var(--shadow-pill);
+      margin-bottom: 20px;
+    }
+    .apple-live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: #34c759;
+      box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.2);
+      animation: pulse-dot 2s infinite ease-in-out;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.85); }
+    }
+
+    /* Bar Status Alert */
+    .alerta-barra {
+      border-radius: 14px;
+      padding: 10px 20px;
+      font-size: 13.5px;
+      font-weight: 500;
+      box-shadow: var(--shadow-pill);
+      border: 1px solid transparent;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       display: flex;
       align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    /* Barra Alert Status Pill */
-    .alerta-barra {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 500;
-      border: 1px solid transparent;
-      transition: all 0.2s ease;
+      justify-content: center;
+      margin-bottom: 18px;
+      transition: all 0.3s ease;
     }
     .alerta-barra.aberta {
-      background-color: var(--success-bg);
-      color: var(--success-text);
-      border-color: var(--success-border);
+      background-color: var(--apple-green-tint);
+      color: var(--apple-green);
+      border-color: var(--apple-green-border);
     }
     .alerta-barra.restrita {
-      background-color: var(--warning-bg);
-      color: var(--warning-text);
-      border-color: var(--warning-border);
+      background-color: var(--apple-orange-tint);
+      color: var(--apple-orange);
+      border-color: var(--apple-orange-border);
     }
     .alerta-barra.fechada {
-      background-color: var(--danger-bg);
-      color: var(--danger-text);
-      border-color: var(--danger-border);
+      background-color: var(--apple-red-tint);
+      color: var(--apple-red);
+      border-color: var(--apple-red-border);
     }
 
-    /* Last Update Indicator */
-    .last-update-pill {
+    /* Apple Toolbar (Filters & Controls) */
+    .apple-toolbar {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 8px 14px;
+      box-shadow: var(--shadow-pill);
+    }
+    .apple-select {
+      border-radius: 999px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 32px 6px 14px;
+      transition: all 0.2s ease;
+    }
+    .apple-select:focus {
+      border-color: var(--apple-blue);
+      box-shadow: 0 0 0 3px var(--apple-blue-tint);
+      background-color: var(--card-bg);
+    }
+    .apple-btn-control {
+      border-radius: 999px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 14px;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background-color: var(--bg-subtle);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-muted);
-      padding: 5px 11px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 500;
-      white-space: nowrap;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .live-pulse {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background-color: #10b981;
-      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+    .apple-btn-control:hover {
+      background-color: var(--card-bg-elevated);
+      border-color: rgba(0, 0, 0, 0.15);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-pill);
     }
-
-    /* Form Controls */
-    .enterprise-select {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border-strong);
-      color: var(--text-main);
-      font-size: 13px;
-      font-weight: 500;
-      border-radius: 6px;
-      padding: 5px 28px 5px 10px;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    [data-bs-theme="dark"] .apple-btn-control:hover {
+      border-color: rgba(255, 255, 255, 0.2);
     }
-    .enterprise-select:focus {
-      border-color: var(--brand-primary);
-      box-shadow: 0 0 0 2px var(--brand-primary-light);
-      outline: none;
-    }
-    .enterprise-btn {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border-strong);
-      color: var(--text-main);
-      font-size: 13px;
-      font-weight: 500;
-      border-radius: 6px;
-      padding: 5px 12px;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      transition: all 0.15s ease;
-    }
-    .enterprise-btn:hover {
-      background-color: var(--bg-subtle);
-      color: var(--text-main);
-    }
-    .enterprise-btn-icon {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border-strong);
-      color: var(--text-muted);
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      transition: all 0.15s ease;
-    }
-    .enterprise-btn-icon:hover {
-      background-color: var(--bg-subtle);
-      color: var(--text-main);
-    }
-    .enterprise-dropdown {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border-strong);
-      border-radius: 8px;
+    .apple-dropdown {
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
       box-shadow: var(--shadow-dropdown);
-      padding: 6px;
     }
-    .enterprise-dropdown .dropdown-item {
-      padding: 6px 12px;
-      border-radius: 5px;
+    .apple-dropdown .form-check-label {
       font-size: 13px;
-      color: var(--text-main);
-    }
-    .enterprise-dropdown .dropdown-item:hover {
-      background-color: var(--bg-subtle);
+      color: var(--text-primary);
     }
 
-    /* Main Container */
-    .main-canvas {
-      max-width: 1500px;
-      margin: 0 auto;
-      padding: 20px 24px;
-    }
-
-    /* Table Card */
-    .table-container-card {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 8px;
+    /* Apple Main Table Card */
+    .apple-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
       box-shadow: var(--shadow-card);
       overflow: hidden;
+      transition: box-shadow 0.3s ease;
     }
     .table-responsive {
-      max-height: calc(100vh - 160px);
+      max-height: 75vh;
       overflow-y: auto;
     }
     #navios-table {
       margin-bottom: 0;
-      width: 100%;
       border-collapse: separate;
       border-spacing: 0;
+      width: 100%;
     }
     #navios-table thead th {
-      background-color: var(--header-bg) !important;
-      color: var(--text-muted);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: var(--header-glass) !important;
+      color: var(--text-secondary);
       font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      padding: 11px 14px;
+      padding: 14px 12px;
       border-top: none;
-      border-bottom: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: 0 1px 0 var(--border-color);
       white-space: nowrap;
-      position: sticky;
-      top: 0;
-      z-index: 10;
     }
     #navios-table tbody td {
-      padding: 10px 14px;
+      padding: 13px 12px;
       font-size: 13px;
-      color: var(--text-main);
+      color: var(--text-primary);
       border-top: none;
       border-bottom: 1px solid var(--border-subtle);
       background-color: transparent !important;
-      transition: background-color 0.12s ease;
-      vertical-align: middle;
+      transition: background-color 0.15s ease;
+    }
+    #navios-table tbody tr {
+      transition: background-color 0.15s ease;
     }
     #navios-table tbody tr:hover td {
       background-color: var(--hover-row) !important;
@@ -352,224 +322,246 @@
       border-bottom: none;
     }
 
-    /* Sortable Header */
+    /* Column Headers with Sort */
     .sortable {
       cursor: pointer;
       user-select: none;
       transition: color 0.15s ease;
     }
     .sortable:hover {
-      color: var(--brand-primary) !important;
+      color: var(--apple-blue) !important;
     }
     .sortable::after {
       content: " ↕";
-      font-size: 10px;
-      opacity: 0.35;
-      margin-left: 4px;
-      font-weight: 400;
+      font-size: 11px;
+      opacity: 0.3;
+      margin-left: 3px;
+      transition: all 0.2s ease;
     }
     .sortable.asc::after {
-      content: " ▲";
+      content: " ↑";
       opacity: 1;
-      color: var(--brand-primary);
+      color: var(--apple-blue);
     }
     .sortable.desc::after {
-      content: " ▼";
+      content: " ↓";
       opacity: 1;
-      color: var(--brand-primary);
+      color: var(--apple-blue);
     }
 
-    /* Professional Status Badges */
-    .badge-status {
+    /* Apple-style Capsule Badges */
+    .badge-apple {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 4px;
-      padding: 3px 8px;
-      font-size: 11px;
       font-weight: 600;
-      border-radius: 4px;
-      letter-spacing: 0.02em;
+      border-radius: 999px;
+      letter-spacing: 0.015em;
       white-space: nowrap;
     }
+    
+    /* Manobras */
     .badge-manobra-e {
-      background-color: var(--success-bg);
-      color: var(--success-text);
-      border: 1px solid var(--success-border);
+      background: var(--apple-green-tint) !important;
+      color: var(--apple-green) !important;
+      border: 1px solid var(--apple-green-border);
+      padding: 3px 10px;
+      font-size: 11px;
     }
     .badge-manobra-s {
-      background-color: var(--danger-bg);
-      color: var(--danger-text);
-      border: 1px solid var(--danger-border);
+      background: var(--apple-red-tint) !important;
+      color: var(--apple-red) !important;
+      border: 1px solid var(--apple-red-border);
+      padding: 3px 10px;
+      font-size: 11px;
     }
     .badge-manobra-m {
-      background-color: var(--warning-bg);
-      color: var(--warning-text);
-      border: 1px solid var(--warning-border);
+      background: var(--apple-orange-tint) !important;
+      color: var(--apple-orange) !important;
+      border: 1px solid var(--apple-orange-border);
+      padding: 3px 10px;
+      font-size: 11px;
     }
 
-    /* Janela Badges */
-    .badge-janela-in {
-      background-color: var(--success-bg);
-      color: var(--success-text);
-      border: 1px solid var(--success-border);
-      padding: 3px 8px;
-      border-radius: 4px;
+    /* Janelas */
+    .badge-janela-ok {
+      background: var(--apple-green-tint) !important;
+      color: var(--apple-green) !important;
+      border: 1px solid var(--apple-green-border);
+      padding: 3px 10px;
       font-size: 11px;
-      font-weight: 600;
     }
-    .badge-janela-out {
-      background-color: var(--danger-bg);
-      color: var(--danger-text);
-      border: 1px solid var(--danger-border);
-      padding: 3px 8px;
-      border-radius: 4px;
+    .badge-janela-fora {
+      background: var(--apple-red-tint) !important;
+      color: var(--apple-red) !important;
+      border: 1px solid var(--apple-red-border);
+      padding: 3px 10px;
       font-size: 11px;
-      font-weight: 600;
     }
 
-    /* Maritime Commercial Service Badge */
-    .badge-servico-box {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 3px 9px;
+    /* Serviços */
+    .badge-servico {
       font-size: 11.5px;
-      font-weight: 600;
-      border-radius: 4px;
-      background-color: var(--bg-subtle);
-      color: var(--text-main);
-      border: 1px solid var(--border-strong);
-      letter-spacing: 0.01em;
-      white-space: nowrap;
+      padding: 3px 10px;
+      background: var(--apple-blue-tint);
+      color: var(--apple-blue);
+      border: 1px solid var(--apple-blue-border);
     }
-    .badge-servico-box.primary,
-    .badge-servico-box.info {
-      background-color: var(--info-bg);
-      color: var(--info-text);
-      border: 1px solid var(--info-border);
+    .badge-servico.primary {
+      background: var(--apple-blue-tint);
+      color: var(--apple-blue);
+      border: 1px solid var(--apple-blue-border);
     }
-    .badge-servico-box.success {
-      background-color: var(--success-bg);
-      color: var(--success-text);
-      border: 1px solid var(--success-border);
+    .badge-servico.success {
+      background: var(--apple-green-tint);
+      color: var(--apple-green);
+      border: 1px solid var(--apple-green-border);
     }
-    .badge-servico-box.warning {
-      background-color: var(--warning-bg);
-      color: var(--warning-text);
-      border: 1px solid var(--warning-border);
+    .badge-servico.warning {
+      background: var(--apple-orange-tint);
+      color: var(--apple-orange);
+      border: 1px solid var(--apple-orange-border);
     }
-    .badge-servico-box.danger {
-      background-color: var(--danger-bg);
-      color: var(--danger-text);
-      border: 1px solid var(--danger-border);
+    .badge-servico.info {
+      background: var(--apple-cyan-tint);
+      color: var(--apple-cyan);
+      border: 1px solid var(--apple-cyan-border);
     }
-    .badge-servico-box.secondary {
-      background-color: var(--bg-subtle);
-      color: var(--text-muted);
-      border: 1px solid var(--border-strong);
+    .badge-servico.danger {
+      background: var(--apple-red-tint);
+      color: var(--apple-red);
+      border: 1px solid var(--apple-red-border);
     }
-    .badge-servico-box.dark {
-      background-color: #f1f5f9;
-      color: #0f172a;
-      border: 1px solid #94a3b8;
+    .badge-servico.secondary {
+      background: rgba(142, 142, 147, 0.12);
+      color: var(--text-secondary);
+      border: 1px solid rgba(142, 142, 147, 0.25);
     }
-    [data-bs-theme="dark"] .badge-servico-box.dark {
-      background-color: #1e293b;
-      color: #f8fafc;
-      border: 1px solid #475569;
+    .badge-servico.dark {
+      background: rgba(30, 41, 59, 0.08) !important;
+      color: #1e293b !important;
+      border: 1px solid rgba(30, 41, 59, 0.28) !important;
+    }
+    [data-bs-theme="dark"] .badge-servico.dark {
+      background: rgba(248, 250, 252, 0.12) !important;
+      color: #f8fafc !important;
+      border: 1px solid rgba(248, 250, 252, 0.3) !important;
     }
 
     /* Live Traffic Button */
-    .btn-traffic-link {
+    .btn-marine {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 3px 8px;
+      background: var(--apple-blue-tint);
+      color: var(--apple-blue);
+      border: 1px solid var(--apple-blue-border);
+      border-radius: 999px;
       font-size: 11.5px;
       font-weight: 500;
-      border-radius: 4px;
-      background-color: var(--bg-surface);
-      color: var(--text-muted);
-      border: 1px solid var(--border-strong);
+      padding: 4px 12px;
       text-decoration: none;
-      transition: all 0.15s ease;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .btn-traffic-link:hover {
-      background-color: var(--brand-primary-light);
-      color: var(--brand-primary);
-      border-color: var(--brand-primary);
-    }
-
-    /* Typography helpers */
-    .font-tabular {
-      font-variant-numeric: tabular-nums;
-    }
-    .font-code {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-    .vessel-name {
-      font-weight: 600;
-      color: var(--text-main);
+    .btn-marine:hover {
+      background: var(--apple-blue);
+      color: #ffffff !important;
+      box-shadow: 0 4px 12px rgba(0, 113, 227, 0.35);
+      transform: translateY(-1px);
     }
 
-    /* Vessel Type with icon */
-    .vessel-type-box {
+    /* Tipo de Navio */
+    .tipo-icon {
       display: flex;
       align-items: center;
       gap: 6px;
     }
-    .vessel-type-box img {
-      width: 22px;
-      height: 22px;
+    .tipo-icon img {
+      width: 26px;
+      height: 26px;
       object-fit: contain;
     }
 
     /* Portêiner Alert Icon */
-    .porterne-alert-icon {
-      width: 20px;
-      height: 20px;
+    .porterne-icon {
+      width: 24px;
+      height: 24px;
       vertical-align: middle;
-      cursor: help;
+      filter: drop-shadow(0 2px 4px rgba(220, 53, 69, 0.3));
+      transition: transform 0.2s ease;
+    }
+    .porterne-icon:hover {
+      transform: scale(1.15);
     }
 
-    /* Pulse dots for ETA alerts */
-    .dot-eta {
-      width: 7px;
-      height: 7px;
+    /* Pulse Dots for Status Alerts */
+    .blink-circle {
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       display: inline-block;
-      flex-shrink: 0;
     }
-    .dot-eta.green { background-color: #10b981; }
-    .dot-eta.orange { background-color: #f59e0b; }
-    .dot-eta.yellow { background-color: #eab308; }
-    .dot-eta.red { background-color: #ef4444; }
+    .blink-green {
+      background-color: #34c759;
+      box-shadow: 0 0 0 2px rgba(52, 199, 89, 0.25);
+      animation: blink-pulse 1.8s infinite;
+    }
+    .blink-orange {
+      background-color: #ff9500;
+      box-shadow: 0 0 0 2px rgba(255, 149, 0, 0.25);
+      animation: blink-pulse 1.8s infinite;
+    }
+    .blink-yellow {
+      background-color: #ffcc00;
+      box-shadow: 0 0 0 2px rgba(255, 204, 0, 0.25);
+      animation: blink-pulse 1.8s infinite;
+    }
+    .blink-red {
+      background-color: #ff3b30;
+      box-shadow: 0 0 0 2px rgba(255, 59, 48, 0.25);
+      animation: blink-pulse 1.8s infinite;
+    }
+    @keyframes blink-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.85); }
+    }
 
-    /* Loading Overlay */
+    /* Row entry animation */
+    @keyframes fadeInRow {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    #navios-table tbody tr {
+      animation: fadeInRow 0.25s ease-out forwards;
+    }
+
+    /* Apple-style Loading Spinner */
     .loading-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(15, 23, 42, 0.4);
-      backdrop-filter: blur(4px);
+      background-color: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       display: flex;
       justify-content: center;
       align-items: center;
       z-index: 1000;
       display: none;
     }
+    [data-bs-theme="dark"] .loading-overlay {
+      background-color: rgba(0, 0, 0, 0.65);
+    }
     .loading-spinner {
-      width: 36px;
-      height: 36px;
-      border: 3px solid rgba(255, 255, 255, 0.2);
-      border-top-color: #38bdf8;
+      width: 42px;
+      height: 42px;
+      border: 3px solid rgba(0, 113, 227, 0.15);
+      border-top-color: var(--apple-blue);
       border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+      animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
     }
     @keyframes spin {
       0% { transform: rotate(0deg); }
@@ -577,60 +569,58 @@
     }
 
     /* Footer */
-    .enterprise-footer {
-      padding: 16px 24px;
+    .apple-footer {
       font-size: 12px;
-      color: var(--text-subtle);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      max-width: 1500px;
-      margin: 0 auto;
+      color: var(--text-secondary);
+      transition: color 0.2s ease;
     }
-    .enterprise-footer a {
-      color: var(--text-muted);
+    .apple-footer a {
+      color: var(--text-primary);
       text-decoration: none;
+      transition: color 0.2s ease;
     }
-    .enterprise-footer a:hover {
-      color: var(--brand-primary);
+    .apple-footer a:hover {
+      color: var(--apple-blue);
     }
 
-    /* Responsive Mobile Layout */
+    /* ============================================================
+       MOBILE FIRST RESPONSIVE CARD VIEW (iOS List/Card Style)
+       ============================================================ */
     @media (max-width: 768px) {
-      .enterprise-navbar { padding: 12px 16px; }
-      .nav-inner { flex-direction: column; align-items: stretch; gap: 12px; }
-      .controls-section { justify-content: space-between; }
-      .main-canvas { padding: 14px 12px; }
-
-      .table-container-card {
+      .apple-card {
         border: none;
         background: transparent;
         box-shadow: none;
+        overflow: visible;
       }
       .table-responsive {
         max-height: none;
         overflow: visible;
+        border: none;
       }
       #navios-table { display: block; }
       #navios-table thead { display: none; }
-      #navios-table tbody { display: flex; flex-direction: column; gap: 10px; }
+      #navios-table tbody { display: flex; flex-direction: column; gap: 12px; }
       #navios-table tr {
         display: flex;
         flex-direction: column;
-        border: 1px solid var(--border-subtle);
-        border-radius: 8px;
-        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 18px;
+        background: var(--card-bg);
         box-shadow: var(--shadow-card);
-        padding: 10px 14px;
+        padding: 12px 14px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      #navios-table tr:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 34px -4px rgba(0, 0, 0, 0.1);
       }
       #navios-table td {
         display: flex;
         justify-content: space-between;
         align-items: center;
         border-bottom: 1px solid var(--border-subtle);
-        padding: 8px 0;
+        padding: 9px 4px;
         text-align: right !important;
       }
       #navios-table td:last-child {
@@ -643,9 +633,20 @@
         font-weight: 500;
         text-align: left;
         font-size: 12px;
-        color: var(--text-muted);
-        margin-right: 12px;
+        color: var(--text-secondary);
+        margin-right: 15px;
       }
+      #navios-table td .tipo-icon { justify-content: flex-end !important; }
+
+      .apple-toolbar {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch !important;
+      }
+      .apple-toolbar > div {
+        justify-content: space-between;
+      }
+      #theme-toggle { align-self: flex-end; }
     }
   </style>
 </head>
@@ -656,42 +657,36 @@
     <div class="loading-spinner"></div>
   </div>
 
-  <!-- Enterprise Header Bar -->
-  <header class="enterprise-navbar">
-    <div class="nav-inner">
-      <div class="brand-section">
-        <div class="brand-icon-box">
-          <span class="material-icons" style="font-size: 22px;">anchor</span>
-        </div>
-        <div>
-          <div class="brand-title">
-            NaviFlow
-            <span class="brand-badge">Operacional</span>
-          </div>
-          <div class="brand-subtitle">Praticagem do Estado do Rio de Janeiro</div>
-        </div>
+  <div class="container py-4" style="max-width: 1400px;">
+    <!-- Barra Status Alert -->
+    {% if barra_info %}
+    <div class="alerta-barra {% if barra_info.fechada %}fechada{% elif barra_info.restrita %}restrita{% else %}aberta{% endif %}">
+      <span class="material-icons me-2" style="font-size: 18px;">
+        {% if barra_info.fechada or barra_info.restrita %}warning{% else %}check_circle{% endif %}
+      </span>
+      <span>{{ barra_info.mensagem }}</span>
+    </div>
+    {% endif %}
+
+    <!-- Apple-style Header -->
+    <header class="text-center mb-3">
+      <div class="apple-logo-badge mx-auto">
+        <span class="material-icons" style="font-size: 26px;">directions_boat</span>
       </div>
+      <h1 class="apple-title">NaviFlow</h1>
+      <p class="apple-subtitle">Monitoramento Inteligente de Tráfego Portuário & Escalas RJ</p>
+      
+      <div id="last-update" class="apple-status-pill">
+        <span class="apple-live-dot"></span>
+        <span id="last-update-text">Última atualização: {{ ultima_atualizacao }}</span>
+      </div>
+    </header>
 
-      <div class="controls-section">
-        <!-- Barra Status Pill -->
-        {% if barra_info %}
-        <div class="alerta-barra {% if barra_info.fechada %}fechada{% elif barra_info.restrita %}restrita{% else %}aberta{% endif %}">
-          <span class="material-icons" style="font-size: 15px;">
-            {% if barra_info.fechada or barra_info.restrita %}warning{% else %}check_circle{% endif %}
-          </span>
-          <span>Barra: {{ barra_info.mensagem }}</span>
-        </div>
-        {% endif %}
-
-        <!-- Last Sync Indicator -->
-        <div class="last-update-pill" id="last-update" title="Horário do último sincronismo">
-          <span class="live-pulse"></span>
-          <span id="last-update-text">Sincronizado: {{ ultima_atualizacao }}</span>
-        </div>
-
-        <!-- Terminal Selector -->
-        <div>
-          <select id="terminal-select" class="form-select form-select-sm enterprise-select">
+    <!-- Toolbar Controls -->
+    <div class="apple-toolbar d-flex justify-content-between align-items-center mb-4">
+      <div class="d-flex align-items-center gap-2">
+        <div class="terminal-selector">
+          <select id="terminal-select" class="form-select form-select-sm apple-select">
             <option value="todos" {% if terminal_selecionado=='todos' %}selected{% endif %}>Todos os Terminais</option>
             <option value="rio" {% if terminal_selecionado=='rio' %}selected{% endif %}>Rio Brasil Terminal</option>
             <option value="multi" {% if terminal_selecionado=='multi' %}selected{% endif %}>Multiterminais</option>
@@ -700,113 +695,103 @@
             <option value="visita" {% if terminal_selecionado=='visita' %}selected{% endif %}>Visita</option>
           </select>
         </div>
-
-        <!-- Filters Dropdown -->
+        
+        <!-- Filter Dropdown -->
         <div class="dropdown">
-          <button class="btn enterprise-btn dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-            <span class="material-icons" style="font-size: 15px;">tune</span> Filtros
+          <button class="btn btn-sm apple-btn-control dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="material-icons" style="font-size: 16px;">filter_list</span> Filtros
           </button>
-          <ul class="dropdown-menu enterprise-dropdown p-2" aria-labelledby="filterDropdown" id="terminal-filter-menu">
-            <li>
-              <div class="dropdown-item">
-                <div class="form-check m-0">
-                  <input class="form-check-input terminal-filter" type="checkbox" value="rio" id="filter-rio" checked>
-                  <label class="form-check-label ms-1" for="filter-rio">Rio Brasil Terminal</label>
-                </div>
+          <ul class="dropdown-menu apple-dropdown p-2" aria-labelledby="filterDropdown" id="terminal-filter-menu">
+            <li class="dropdown-item rounded-3">
+              <div class="form-check">
+                <input class="form-check-input terminal-filter" type="checkbox" value="rio" id="filter-rio" checked>
+                <label class="form-check-label" for="filter-rio">Rio Brasil Terminal</label>
               </div>
             </li>
-            <li>
-              <div class="dropdown-item">
-                <div class="form-check m-0">
-                  <input class="form-check-input terminal-filter" type="checkbox" value="multi" id="filter-multi" checked>
-                  <label class="form-check-label ms-1" for="filter-multi">Multiterminais</label>
-                </div>
+            <li class="dropdown-item rounded-3">
+              <div class="form-check">
+                <input class="form-check-input terminal-filter" type="checkbox" value="multi" id="filter-multi" checked>
+                <label class="form-check-label" for="filter-multi">Multiterminais</label>
               </div>
             </li>
-            <li>
-              <div class="dropdown-item">
-                <div class="form-check m-0">
-                  <input class="form-check-input terminal-filter" type="checkbox" value="manguinhos" id="filter-manguinhos" checked>
-                  <label class="form-check-label ms-1" for="filter-manguinhos">Manguinhos</label>
-                </div>
+            <li class="dropdown-item rounded-3">
+              <div class="form-check">
+                <input class="form-check-input terminal-filter" type="checkbox" value="manguinhos" id="filter-manguinhos" checked>
+                <label class="form-check-label" for="filter-manguinhos">Manguinhos</label>
               </div>
             </li>
-            <li>
-              <div class="dropdown-item">
-                <div class="form-check m-0">
-                  <input class="form-check-input terminal-filter" type="checkbox" value="pg1" id="filter-pg1" checked>
-                  <label class="form-check-label ms-1" for="filter-pg1">PG1</label>
-                </div>
+            <li class="dropdown-item rounded-3">
+              <div class="form-check">
+                <input class="form-check-input terminal-filter" type="checkbox" value="pg1" id="filter-pg1" checked>
+                <label class="form-check-label" for="filter-pg1">PG1</label>
               </div>
             </li>
-            <li>
-              <div class="dropdown-item">
-                <div class="form-check m-0">
-                  <input class="form-check-input terminal-filter" type="checkbox" value="visita" id="filter-visita" checked>
-                  <label class="form-check-label ms-1" for="filter-visita">Visita</label>
-                </div>
+            <li class="dropdown-item rounded-3">
+              <div class="form-check">
+                <input class="form-check-input terminal-filter" type="checkbox" value="visita" id="filter-visita" checked>
+                <label class="form-check-label" for="filter-visita">Visita</label>
               </div>
             </li>
           </ul>
         </div>
-
-        <!-- Theme Toggle Button -->
-        <button id="theme-toggle" class="btn enterprise-btn-icon" title="Alternar Modo Escuro">
-          <span class="material-icons" style="font-size: 17px;">dark_mode</span>
+      </div>
+      
+      <!-- Theme Toggle Button -->
+      <div>
+        <button id="theme-toggle" class="btn btn-sm apple-btn-control" title="Alternar Modo Escuro">
+          <span class="material-icons" style="font-size: 18px; vertical-align: middle;">dark_mode</span>
         </button>
       </div>
     </div>
-  </header>
 
-  <!-- Main Canvas -->
-  <main class="main-canvas">
-    <div class="table-container-card">
+    <!-- Apple Table Card -->
+    <div class="apple-card">
       <div class="table-responsive">
-        <table class="table align-middle" id="navios-table">
+        <table class="table table-hover text-center align-middle" id="navios-table">
           <thead>
             <tr>
-              <th style="width: 44px; text-align: center;">Alertas</th>
-              <th class="sortable" onclick="sortTable(1)" style="min-width: 105px;">Data / Hora</th>
+              <th>Alerta</th>
+              <th class="sortable" onclick="sortTable(1)">Data / Hora</th>
               <th class="sortable" onclick="sortTable(2)">Navio</th>
               <th class="sortable" onclick="sortTable(3)">Serviço</th>
               <th class="sortable" onclick="sortTable(4)">Janela</th>
               <th class="sortable" onclick="sortTable(5)">IMO</th>
-              <th class="sortable" onclick="sortTable(6)">Tipo de Embarcação</th>
+              <th class="sortable" onclick="sortTable(6)">Tipo</th>
               <th class="sortable" onclick="sortTable(7)">Calado</th>
               <th class="sortable" onclick="sortTable(8)">Manobra</th>
               <th class="sortable" onclick="sortTable(9)">Berço</th>
-              <th style="width: 80px; text-align: center;">AIS</th>
+              <th>Live Traffic</th>
             </tr>
           </thead>
           <tbody>
             {% for navio in navios %}
             <tr class="{{ navio.status }}" data-terminal="{{ navio.terminal }}">
-              <td data-label="Alertas" style="text-align: center;">
+              <td data-label="Alerta">
                 {% if navio.conflito_porterne %}
-                <img src="https://i.ibb.co/m5yy049q/portane.png" alt="Conflito Portêner" class="porterne-alert-icon"
-                  title="Alerta Operacional: Possível necessidade de levantar lança do portêiner" />
+                <img src="https://i.ibb.co/m5yy049q/portane.png" alt="Conflito Portêner" class="porterne-icon"
+                  title="Possível necessidade de levantar lança do portêiner" />
                 {% endif %}
               </td>
               <td data-label="Data / Hora">
-                <div class="fw-semibold font-tabular">{{ navio.data }}</div>
-                <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted);">{{ navio.dia_semana }}</div>
-                <div class="d-flex align-items-center gap-1 mt-1 font-tabular" style="font-size: 12px;">
+                <div class="fw-semibold">{{ navio.data }}</div>
+                <div style="font-size: 0.85em; text-transform: capitalize; color: var(--text-secondary);">{{ navio.dia_semana }}</div>
+                <div class="d-flex align-items-center justify-content-center gap-1 mt-1 small">
                   {% if navio.alerta == 'entrada_antecipada' %}
-                  <span class="dot-eta orange" title="Entrada Antecipada"></span>
+                  <span class="blink-circle blink-orange"></span>
                   {% elif navio.alerta == 'entrada_futura' %}
-                  <span class="dot-eta green" title="Entrada Programada"></span>
+                  <span class="blink-circle blink-green"></span>
                   {% elif navio.alerta == 'saida_futura' %}
-                  <span class="dot-eta yellow" title="Saída Futura"></span>
+                  <span class="blink-circle blink-yellow"></span>
                   {% elif navio.alerta == 'saida_atrasada' %}
-                  <span class="dot-eta red" title="Saída Atrasada"></span>
-                  {% endif %}
+                  <span class="blink-circle blink-red"></span>
+                  {% endif %} 
                   <span>{{ navio.hora }}</span>
                 </div>
               </td>
-              <td data-label="Navio" class="vessel-name">{{ navio.navio }}</td>
+              <td data-label="Navio" class="fw-medium">{{ navio.navio }}</td>
               <td data-label="Serviço">
                 {% if navio.servico %}
-                <span class="badge-servico-box {{ navio.servico_cor }}" 
+                <span class="badge-apple badge-servico {{ navio.servico_cor }}" 
                       title="{{ navio.servico_armadores }}"
                       style="cursor: help;">
                   {{ navio.servico }}
@@ -817,13 +802,13 @@
               </td>
               <td data-label="Janela">
                 {% if navio.status_janela == 'NA_JANELA' %}
-                <span class="badge-janela-in" 
+                <span class="badge-apple badge-janela-ok" 
                       title="{{ navio.janela_texto }}" 
                       style="cursor: help;">
                   ● Na Janela
                 </span>
                 {% elif navio.status_janela == 'FORA_DA_JANELA' %}
-                <span class="badge-janela-out" 
+                <span class="badge-apple badge-janela-fora" 
                       title="{{ navio.janela_texto }}" 
                       style="cursor: help;">
                   ▲ Fora da Janela
@@ -832,35 +817,33 @@
                 <span class="text-muted">-</span>
                 {% endif %}
               </td>
-              <td data-label="IMO" class="font-code">{{ navio.imo if navio.imo else '-' }}</td>
+              <td data-label="IMO">{{ navio.imo if navio.imo else '-' }}</td>
               <td data-label="Tipo">
-                <div class="vessel-type-box">
+                <div class="tipo-icon justify-content-center">
                   {% if navio.icone %}
                   <img src="{{ navio.icone }}" alt="Ícone" />
-                  {% endif %}
+                  {% endif %} 
                   <span>{{ navio.tipo_navio if navio.tipo_navio else '-' }}</span>
                 </div>
               </td>
-              <td data-label="Calado" class="font-tabular font-code" style="font-weight: 500;">
-                {{ navio.calado }} m
-              </td>
+              <td data-label="Calado">{{ navio.calado }}</td>
               <td data-label="Manobra">
                 {% if navio.manobra == "E" %}
-                <span class="badge-status badge-manobra-e">ENTRADA</span>
+                <span class="badge-apple badge-manobra-e">ENTRADA</span>
                 {% elif navio.manobra == "S" %}
-                <span class="badge-status badge-manobra-s">SAÍDA</span>
+                <span class="badge-apple badge-manobra-s">SAÍDA</span>
                 {% elif navio.manobra == "M" %}
-                <span class="badge-status badge-manobra-m">MUDANÇA</span>
+                <span class="badge-apple badge-manobra-m">MUDANÇA</span>
                 {% else %} {{ navio.manobra }} {% endif %}
               </td>
-              <td data-label="Berço" class="fw-semibold">{{ navio.beco }}</td>
-              <td data-label="AIS" style="text-align: center;">
+              <td data-label="Berço">{{ navio.beco }}</td>
+              <td data-label="Live Traffic">
                 {% if navio.imo %}
-                <a href="https://www.marinetraffic.com/en/ais/details/ships/imo:{{ navio.imo }}" target="_blank" class="btn-traffic-link" title="Rastrear posição ao vivo no MarineTraffic">
-                  <span class="material-icons" style="font-size: 14px;">map</span> AIS
+                <a href="https://www.marinetraffic.com/en/ais/details/ships/imo:{{ navio.imo }}" target="_blank" class="btn-marine" title="Ver no MarineTraffic">
+                  <span class="material-icons" style="font-size: 15px;">map</span> Mapa
                 </a>
                 {% else %}
-                <span class="text-muted">-</span>
+                -
                 {% endif %}
               </td>
             </tr>
@@ -869,17 +852,17 @@
         </table>
       </div>
     </div>
-  </main>
-
-  <!-- Clean Minimalist Footer -->
-  <footer class="enterprise-footer">
-    <div>
-      NaviFlow Operacional • Monitoramento de Escalas da Praticagem RJ
+    
+    <!-- Footer -->
+    <div class="text-center mt-4 mb-2 apple-footer">
+      Desenvolvido por <a href="https://www.linkedin.com/in/dalmo-cabral-062374131/" target="_blank" class="fw-semibold d-inline-flex align-items-center gap-1">
+        Dalmo dos Santos Cabral
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-linkedin" viewBox="0 0 16 16" style="color: #0a66c2;">
+          <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225z"/>
+        </svg>
+      </a>
     </div>
-    <div>
-      Desenvolvido por <a href="https://www.linkedin.com/in/dalmo-cabral-062374131/" target="_blank" class="fw-semibold">Dalmo dos Santos Cabral</a>
-    </div>
-  </footer>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
@@ -962,10 +945,8 @@
 
         // Tratamento especial para números (coluna 7 - Calado)
         if (columnIndex === 7) {
-          const cleanA = aText.replace("m", "").replace(",", ".").trim();
-          const cleanB = bText.replace("m", "").replace(",", ".").trim();
-          const numA = parseFloat(cleanA) || 0;
-          const numB = parseFloat(cleanB) || 0;
+          const numA = parseFloat(aText.replace(",", "."));
+          const numB = parseFloat(bText.replace(",", "."));
           return currentSort.direction === "asc" ? numA - numB : numB - numA;
         }
 
@@ -995,26 +976,26 @@
             row.className = navio.status;
             row.setAttribute('data-terminal', navio.terminal);
 
-            let alertaDotHTML = "";
+            let alertaHTML = "";
             if (navio.alerta === "entrada_antecipada") {
-              alertaDotHTML = '<span class="dot-eta orange" title="Entrada Antecipada"></span>';
+              alertaHTML = '<span class="blink-circle blink-orange"></span>';
             } else if (navio.alerta === "entrada_futura") {
-              alertaDotHTML = '<span class="dot-eta green" title="Entrada Programada"></span>';
+              alertaHTML = '<span class="blink-circle blink-green"></span>';
             } else if (navio.alerta === "saida_futura") {
-              alertaDotHTML = '<span class="dot-eta yellow" title="Saída Futura"></span>';
+              alertaHTML = '<span class="blink-circle blink-yellow"></span>';
             } else if (navio.alerta === "saida_atrasada") {
-              alertaDotHTML = '<span class="dot-eta red" title="Saída Atrasada"></span>';
+              alertaHTML = '<span class="blink-circle blink-red"></span>';
             }
 
             let porterneIconHTML = "";
             if (navio.conflito_porterne) {
-              porterneIconHTML = '<img src="https://i.ibb.co/m5yy049q/portane.png" alt="Conflito Portêner" class="porterne-alert-icon" title="Alerta: Possível necessidade de levantar lança do portêiner" />';
+              porterneIconHTML = '<img src="https://i.ibb.co/m5yy049q/portane.png" alt="Conflito Portêner" class="porterne-icon" title="Possível necessidade de levantar lança do portêiner" />';
             }
 
             let servicoHTML = '<span class="text-muted">-</span>';
             if (navio.servico) {
               servicoHTML = `
-                <span class="badge-servico-box ${navio.servico_cor || 'primary'}" 
+                <span class="badge-apple badge-servico ${navio.servico_cor || 'primary'}" 
                       title="${navio.servico_armadores || ''}"
                       style="cursor: help;">
                   ${navio.servico}
@@ -1024,63 +1005,61 @@
 
             let janelaHTML = '<span class="text-muted">-</span>';
             if (navio.status_janela === 'NA_JANELA') {
-              janelaHTML = `<span class="badge-janela-in" title="${navio.janela_texto || ''}" style="cursor: help;">● Na Janela</span>`;
+              janelaHTML = `<span class="badge-apple badge-janela-ok" title="${navio.janela_texto || ''}" style="cursor: help;">● Na Janela</span>`;
             } else if (navio.status_janela === 'FORA_DA_JANELA') {
-              janelaHTML = `<span class="badge-janela-out" title="${navio.janela_texto || ''}" style="cursor: help;">▲ Fora da Janela</span>`;
+              janelaHTML = `<span class="badge-apple badge-janela-fora" title="${navio.janela_texto || ''}" style="cursor: help;">▲ Fora da Janela</span>`;
             }
 
             row.innerHTML = `
-            <td data-label="Alertas" style="text-align: center;">${porterneIconHTML}</td>
+            <td data-label="Alerta">${porterneIconHTML}</td>
             <td data-label="Data / Hora">
-              <div class="fw-semibold font-tabular">${navio.data}</div>
-              <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted);">${navio.dia_semana || ''}</div>
-              <div class="d-flex align-items-center gap-1 mt-1 font-tabular" style="font-size: 12px;">
-                ${alertaDotHTML} <span>${navio.hora}</span>
+              <div class="fw-semibold">${navio.data}</div>
+              <div style="font-size: 0.85em; text-transform: capitalize; color: var(--text-secondary);">${navio.dia_semana || ''}</div>
+              <div class="d-flex align-items-center justify-content-center gap-1 mt-1 small">
+                ${alertaHTML} <span>${navio.hora}</span>
               </div>
             </td>
-            <td data-label="Navio" class="vessel-name">${navio.navio}</td>
+            <td data-label="Navio" class="fw-medium">${navio.navio}</td>
             <td data-label="Serviço">${servicoHTML}</td>
             <td data-label="Janela">${janelaHTML}</td>
-            <td data-label="IMO" class="font-code">${navio.imo || "-"}</td>
+            <td data-label="IMO">${navio.imo || "-"}</td>
             <td data-label="Tipo">
-              <div class="vessel-type-box">
+              <div class="tipo-icon justify-content-center">
                 ${navio.icone ? `<img src="${navio.icone}" alt="Ícone">` : ""}
                 <span>${navio.tipo_navio || "-"}</span>
               </div>
             </td>
-            <td data-label="Calado" class="font-tabular font-code" style="font-weight: 500;">
-              ${navio.calado} m
-            </td>
+            <td data-label="Calado">${navio.calado}</td>
             <td data-label="Manobra">
               ${navio.manobra === "E"
-                ? '<span class="badge-status badge-manobra-e">ENTRADA</span>'
+                ? '<span class="badge-apple badge-manobra-e">ENTRADA</span>'
                 : navio.manobra === "S"
-                  ? '<span class="badge-status badge-manobra-s">SAÍDA</span>'
+                  ? '<span class="badge-apple badge-manobra-s">SAÍDA</span>'
                   : navio.manobra === "M"
-                    ? '<span class="badge-status badge-manobra-m">MUDANÇA</span>'
+                    ? '<span class="badge-apple badge-manobra-m">MUDANÇA</span>'
                     : navio.manobra
               }
             </td>
-            <td data-label="Berço" class="fw-semibold">${navio.beco}</td>
-            <td data-label="AIS" style="text-align: center;">
+            <td data-label="Berço">${navio.beco}</td>
+            <td data-label="Live Traffic">
               ${navio.imo 
-                ? `<a href="https://www.marinetraffic.com/en/ais/details/ships/imo:${navio.imo}" target="_blank" class="btn-traffic-link" title="Rastrear posição ao vivo no MarineTraffic">
-                     <span class="material-icons" style="font-size: 14px;">map</span> AIS
+                ? `<a href="https://www.marinetraffic.com/en/ais/details/ships/imo:${navio.imo}" target="_blank" class="btn-marine" title="Ver no MarineTraffic">
+                     <span class="material-icons" style="font-size: 15px;">map</span> Mapa
                    </a>`
-                : '<span class="text-muted">-</span>'
+                : "-"
               }
             </td>
           `;
             tabela.appendChild(row);
           });
 
-          // Atualiza indicador de sincronismo
+          // Atualiza indicador de status
           const lastUpdateText = document.getElementById("last-update-text");
           if (lastUpdateText) {
-            lastUpdateText.innerText = `Sincronizado: ${data.ultima_atualizacao}`;
+            lastUpdateText.innerText = `Última atualização: ${data.ultima_atualizacao}`;
           }
 
-          // Atualiza alerta da barra
+          // Atualizar alerta da barra
           const alertaBarra = document.querySelector(".alerta-barra");
           if (alertaBarra && data.barra_info) {
             alertaBarra.classList.remove("restrita", "aberta", "fechada");
@@ -1088,7 +1067,7 @@
             const isRestrita = data.barra_info.restrita;
             alertaBarra.classList.add(isFechada ? "fechada" : isRestrita ? "restrita" : "aberta");
             const iconName = isFechada || isRestrita ? 'warning' : 'check_circle';
-            alertaBarra.innerHTML = `<span class="material-icons" style="font-size: 15px;">${iconName}</span> <span>Barra: ${data.barra_info.mensagem}</span>`;
+            alertaBarra.innerHTML = `<span class="material-icons me-2" style="font-size: 18px;">${iconName}</span> <span>${data.barra_info.mensagem}</span>`;
           }
           
           applyTerminalFilters();
@@ -1109,7 +1088,7 @@
       applyTerminalFilters();
     });
 
-    // Event listener dos filtros de terminal
+    // Event listener dos filtros
     document.querySelectorAll('.terminal-filter').forEach(checkbox => {
       checkbox.addEventListener('change', function() {
         const filters = {};
@@ -1121,7 +1100,7 @@
       });
     });
 
-    // Inicialização ao carregar
+    // Ao carregar a página
     document.addEventListener("DOMContentLoaded", function () {
       const terminalSalvo = localStorage.getItem("terminalSelecionado");
       const selectElement = document.getElementById("terminal-select");
@@ -1150,7 +1129,7 @@
       atualizarTabela(terminal, false);
     }, 300000);
 
-    // Dark Mode Toggle
+    // Dark Mode Apple
     const themeToggleBtn = document.getElementById('theme-toggle');
     const themeIcon = themeToggleBtn.querySelector('.material-icons');
     
