@@ -230,6 +230,34 @@
       box-shadow: 0 0 0 3px var(--apple-blue-tint);
       background-color: var(--card-bg);
     }
+    .apple-search-input {
+      border-radius: 999px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+      font-size: 13px;
+      padding-top: 6px;
+      padding-bottom: 6px;
+      transition: all 0.2s ease;
+    }
+    .apple-search-input:focus {
+      border-color: var(--apple-blue);
+      box-shadow: 0 0 0 3px var(--apple-blue-tint);
+      background-color: var(--card-bg);
+      color: var(--text-primary);
+      outline: none;
+    }
+    .apple-search-input::placeholder {
+      color: var(--text-secondary);
+      font-size: 12.5px;
+    }
+    [data-bs-theme="dark"] .apple-search-input {
+      background-color: var(--card-bg-elevated);
+      color: var(--text-primary);
+    }
+    [data-bs-theme="dark"] .apple-search-input:focus {
+      background-color: var(--card-bg);
+    }
     .apple-btn-control {
       border-radius: 999px;
       border: 1px solid var(--border-color);
@@ -698,8 +726,8 @@
     </header>
 
     <!-- Toolbar Controls -->
-    <div class="apple-toolbar d-flex justify-content-between align-items-center mb-4">
-      <div class="d-flex align-items-center gap-2">
+    <div class="apple-toolbar d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+      <div class="d-flex align-items-center gap-2 flex-wrap">
         <div class="terminal-selector">
           <select id="terminal-select" class="form-select form-select-sm apple-select">
             <option value="todos" {% if terminal_selecionado=='todos' %}selected{% endif %}>Todos os Terminais</option>
@@ -748,6 +776,17 @@
               </div>
             </li>
           </ul>
+        </div>
+      </div>
+
+      <!-- Live Search Box -->
+      <div class="search-container flex-grow-1 mx-2" style="max-width: 440px; min-width: 220px;">
+        <div class="position-relative">
+          <span class="material-icons search-icon position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary" style="font-size: 17px; pointer-events: none; opacity: 0.6;">search</span>
+          <input type="text" id="vessel-search-input" class="form-control form-control-sm apple-search-input ps-5 pe-4" placeholder="Buscar navio, serviço, IMO, berço..." autocomplete="off">
+          <button type="button" id="search-clear-btn" class="btn btn-sm position-absolute top-50 end-0 translate-middle-y me-2 p-0 text-secondary" style="display: none; border: none; background: transparent; line-height: 1;" title="Limpar pesquisa">
+            <span class="material-icons" style="font-size: 16px; opacity: 0.7;">close</span>
+          </button>
         </div>
       </div>
       
@@ -896,24 +935,45 @@
       if (overlay) overlay.style.display = show ? "flex" : "none";
     }
 
-    // Função para aplicar os filtros de terminal
+    // Função auxiliar para normalizar texto (sem acentos e minúsculo)
+    function normalizarTexto(str) {
+      if (!str) return '';
+      return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    }
+
+    // Função para aplicar os filtros de terminal e busca
     function applyTerminalFilters() {
       const terminalSelect = document.getElementById('terminal-select');
+      const searchInput = document.getElementById('vessel-search-input');
+      const clearBtn = document.getElementById('search-clear-btn');
+
+      const rawSearch = searchInput ? searchInput.value : '';
+      const searchTerm = normalizarTexto(rawSearch);
+
+      if (clearBtn) {
+        clearBtn.style.display = rawSearch ? 'block' : 'none';
+      }
+
       const rows = document.querySelectorAll('#navios-table tbody tr');
       
-      if (terminalSelect.value !== 'todos') {
-        rows.forEach(row => { row.style.display = ''; });
-        return;
-      }
-      
       const selectedTerminals = [];
-      document.querySelectorAll('.terminal-filter:checked').forEach(checkbox => {
-        selectedTerminals.push(checkbox.value);
-      });
+      if (terminalSelect.value === 'todos') {
+        document.querySelectorAll('.terminal-filter:checked').forEach(checkbox => {
+          selectedTerminals.push(checkbox.value);
+        });
+      }
       
       rows.forEach(row => {
         const terminal = row.getAttribute('data-terminal');
-        if (selectedTerminals.includes(terminal)) {
+        const matchesTerminal = (terminalSelect.value !== 'todos') || selectedTerminals.includes(terminal);
+
+        let matchesSearch = true;
+        if (searchTerm) {
+          const rowNormalized = normalizarTexto(row.textContent);
+          matchesSearch = rowNormalized.includes(searchTerm);
+        }
+
+        if (matchesTerminal && matchesSearch) {
           row.style.display = '';
         } else {
           row.style.display = 'none';
@@ -1102,6 +1162,26 @@
       localStorage.setItem("terminalSelecionado", terminal);
       applyTerminalFilters();
     });
+
+    // Event listeners para o campo de busca
+    const searchInput = document.getElementById("vessel-search-input");
+    const searchClearBtn = document.getElementById("search-clear-btn");
+
+    if (searchInput) {
+      searchInput.addEventListener("input", function () {
+        applyTerminalFilters();
+      });
+    }
+
+    if (searchClearBtn) {
+      searchClearBtn.addEventListener("click", function () {
+        if (searchInput) {
+          searchInput.value = "";
+          searchInput.focus();
+        }
+        applyTerminalFilters();
+      });
+    }
 
     // Event listener dos filtros
     document.querySelectorAll('.terminal-filter').forEach(checkbox => {
