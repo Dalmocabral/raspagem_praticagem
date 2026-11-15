@@ -288,10 +288,47 @@
       backdrop-filter: blur(25px);
       -webkit-backdrop-filter: blur(25px);
       box-shadow: var(--shadow-dropdown);
+      padding: 6px;
+      margin-top: 6px !important;
+    }
+    .apple-dropdown .dropdown-item {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: 10px;
+      transition: all 0.15s ease;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+    }
+    .apple-dropdown .dropdown-item:hover {
+      background-color: var(--apple-blue-tint);
+      color: var(--apple-blue);
+    }
+    .apple-dropdown .dropdown-item.active,
+    .apple-dropdown .dropdown-item:active {
+      background-color: var(--apple-blue) !important;
+      color: #ffffff !important;
+      font-weight: 600;
+    }
+    [data-bs-theme="dark"] .apple-dropdown .dropdown-item:hover {
+      background-color: rgba(41, 151, 255, 0.15);
+      color: var(--apple-blue);
+    }
+    [data-bs-theme="dark"] .apple-dropdown .dropdown-item.active {
+      background-color: var(--apple-blue) !important;
+      color: #ffffff !important;
     }
     .apple-dropdown .form-check-label {
       font-size: 13px;
       color: var(--text-primary);
+      cursor: pointer;
     }
 
     /* Apple Main Table Card */
@@ -728,15 +765,20 @@
     <!-- Toolbar Controls -->
     <div class="apple-toolbar d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
       <div class="d-flex align-items-center gap-2 flex-wrap">
-        <div class="terminal-selector">
-          <select id="terminal-select" class="form-select form-select-sm apple-select">
-            <option value="todos" {% if terminal_selecionado=='todos' %}selected{% endif %}>Todos os Terminais</option>
-            <option value="rio" {% if terminal_selecionado=='rio' %}selected{% endif %}>Rio Brasil Terminal</option>
-            <option value="multi" {% if terminal_selecionado=='multi' %}selected{% endif %}>Multiterminais</option>
-            <option value="manguinhos" {% if terminal_selecionado=='manguinhos' %}selected{% endif %}>Manguinhos</option>
-            <option value="pg1" {% if terminal_selecionado=='pg1' %}selected{% endif %}>PG1</option>
-            <option value="visita" {% if terminal_selecionado=='visita' %}selected{% endif %}>Visita</option>
-          </select>
+        <!-- Terminal Dropdown (Apple-style Rounded Dropdown) -->
+        <div class="dropdown terminal-selector">
+          <input type="hidden" id="terminal-select" value="todos">
+          <button class="btn btn-sm apple-btn-control dropdown-toggle" type="button" id="terminalDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+            <span id="terminal-select-label">Todos os Terminais</span>
+          </button>
+          <ul class="dropdown-menu apple-dropdown p-2 shadow-lg" aria-labelledby="terminalDropdownBtn" id="terminal-dropdown-menu">
+            <li><button type="button" class="dropdown-item terminal-dropdown-item active" data-value="todos">Todos os Terminais</button></li>
+            <li><button type="button" class="dropdown-item terminal-dropdown-item" data-value="rio">Rio Brasil Terminal</button></li>
+            <li><button type="button" class="dropdown-item terminal-dropdown-item" data-value="multi">Multiterminais</button></li>
+            <li><button type="button" class="dropdown-item terminal-dropdown-item" data-value="manguinhos">Manguinhos</button></li>
+            <li><button type="button" class="dropdown-item terminal-dropdown-item" data-value="pg1">PG1</button></li>
+            <li><button type="button" class="dropdown-item terminal-dropdown-item" data-value="visita">Visita</button></li>
+          </ul>
         </div>
         
         <!-- Filter Dropdown -->
@@ -1155,12 +1197,49 @@
         });
     }
 
-    // Event listener do seletor de terminais
-    document.getElementById("terminal-select").addEventListener("change", function () {
-      const terminal = this.value;
-      atualizarTabela(terminal, true);
-      localStorage.setItem("terminalSelecionado", terminal);
-      applyTerminalFilters();
+    // Mapeamento e função para selecionar terminal no dropdown arredondado
+    const terminalLabels = {
+      'todos': 'Todos os Terminais',
+      'rio': 'Rio Brasil Terminal',
+      'multi': 'Multiterminais',
+      'manguinhos': 'Manguinhos',
+      'pg1': 'PG1',
+      'visita': 'Visita'
+    };
+
+    function selecionarTerminal(valor, acionarAtualizacao = true) {
+      if (!terminalLabels[valor]) valor = 'todos';
+      
+      const hiddenInput = document.getElementById('terminal-select');
+      const labelSpan = document.getElementById('terminal-select-label');
+      
+      if (hiddenInput) hiddenInput.value = valor;
+      if (labelSpan) labelSpan.textContent = terminalLabels[valor] || 'Todos os Terminais';
+
+      // Atualiza classe active nos itens do menu
+      document.querySelectorAll('.terminal-dropdown-item').forEach(item => {
+        if (item.getAttribute('data-value') === valor) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+
+      localStorage.setItem('terminalSelecionado', valor);
+
+      if (acionarAtualizacao) {
+        atualizarTabela(valor, true);
+        applyTerminalFilters();
+      }
+    }
+
+    // Event listeners para os itens do dropdown de terminal
+    document.querySelectorAll('.terminal-dropdown-item').forEach(item => {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        const valor = this.getAttribute('data-value');
+        selecionarTerminal(valor, true);
+      });
     });
 
     // Event listeners para o campo de busca
@@ -1197,12 +1276,8 @@
 
     // Ao carregar a página
     document.addEventListener("DOMContentLoaded", function () {
-      const terminalSalvo = localStorage.getItem("terminalSelecionado");
-      const selectElement = document.getElementById("terminal-select");
-
-      if (terminalSalvo) {
-        selectElement.value = terminalSalvo;
-      }
+      const terminalSalvo = localStorage.getItem("terminalSelecionado") || "todos";
+      selecionarTerminal(terminalSalvo, false);
 
       const savedFilters = localStorage.getItem('terminalFilters');
       if (savedFilters) {
@@ -1215,7 +1290,7 @@
         });
       }
 
-      atualizarTabela(selectElement.value, false);
+      atualizarTabela(terminalSalvo, false);
     });
 
     // Polling automático a cada 5 minutos
