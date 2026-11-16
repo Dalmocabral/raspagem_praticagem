@@ -1,9 +1,11 @@
 """
 lineup_service.py - Integração com a API de Lineup do Rio Brasil Terminal.
-Obtém serviços marítimos (joint, operadoras, viagem) e calcula o status
-de conformidade com a Janela Oficial de Atracação (Berth Window).
+Obtém serviços marítimos (joint, operadoras, viagem) e gerencia as Janelas
+Oficiais de Atracação (Berth Windows) com configuração dinâmica e persistente.
 """
 
+import os
+import json
 import requests
 from datetime import datetime, timedelta, timezone
 
@@ -18,196 +20,387 @@ HEADERS = {
     "Referer": "https://servicosabertosriobrasil.azurewebsites.net/"
 }
 
-# Mapeamento oficial dos serviços e consórcios (Joints/Armadores)
-SERVICOS_MAP = {
-    "TGO": {
-        "nome": "Tango",
-        "armadores": "Hapag Lloyd - Maersk (slot Sealand)",
-        "cor": "primary"
-    },
-    "COS": {
-        "nome": "CONOSUR",
-        "armadores": "Maersk - Sealand - Hapag Lloyd",
-        "cor": "info"
-    },
-    "SE1": {
-        "nome": "ESA / SEAS 1",
-        "armadores": "CMA CGM (SEAS) - Evergreen (ESA) - COSCO (ESA) - PIL (ES1) (Slot Yang Ming – SA3 - OOCL (TLA1))",
-        "cor": "success"
-    },
-    "FED": {
-        "nome": "Feeder (Log-In)",
-        "armadores": "Log-In (Slot Maersk / Aliança / CMA CGM / Mercosul / ZIM)",
-        "cor": "warning"
-    },
-    "BZX": {
-        "nome": "BRAZEx",
-        "armadores": "CMA CGM – Cosco (Slot Maersk – ONE)",
-        "cor": "danger"
-    },
+# Caminho do arquivo de configuração persistente
+CONFIG_FILE = os.path.join(os.path.dirname(__file__), "janelas_config.json")
+
+# Nomes dos dias da semana (0 = Domingo até 6 = Sábado)
+DIAS_SEMANA = [
+    "Domingo",
+    "Segunda",
+    "Terça",
+    "Quarta",
+    "Quinta",
+    "Sexta",
+    "Sábado"
+]
+
+# Configurações padrão de serviços e armadores conhecidos
+DEFAULT_SERVICOS_MAP = {
     "BCO": {
         "nome": "BRACO",
         "armadores": "Mercosul (Slot LOG-IN)",
-        "cor": "secondary"
-    },
-    "S2N": {
-        "nome": "SEAS 2",
-        "armadores": "CMA-CGM / Cosco - (Slot Evergreen, PIL e Yang Ming)",
-        "cor": "dark"
-    },
-    "S2S": {
-        "nome": "SEAS 2",
-        "armadores": "CMA-CGM / Cosco - (Slot Evergreen, PIL e Yang Ming)",
-        "cor": "dark"
-    },
-    "LUX": {
-        "nome": "LUX / ESE 2 - EEX",
-        "armadores": "Cosco - One - OOCL",
-        "cor": "primary"
-    },
-    "NCS": {
-        "nome": "Norcoast",
-        "armadores": "Norcoast",
-        "cor": "info"
+        "cor": "secondary",
+        "ativo": True,
+        "inicio_dia": 0, "inicio_hora": "07:00",
+        "fim_dia": 1, "fim_hora": "01:00",
+        "descricao": "Domingo 07:00 → Segunda 01:00"
     },
     "ZFS": {
         "nome": "Falcon (ZFS)",
         "armadores": "ZIM",
-        "cor": "success"
+        "cor": "success",
+        "ativo": True,
+        "inicio_dia": 0, "inicio_hora": "01:00",
+        "fim_dia": 0, "fim_hora": "19:00",
+        "descricao": "Domingo 01:00 → Domingo 19:00"
+    },
+    "LUX": {
+        "nome": "LUX / ESE 2 - EEX",
+        "armadores": "Cosco - One - OOCL",
+        "cor": "primary",
+        "ativo": True,
+        "inicio_dia": 0, "inicio_hora": "17:00",
+        "fim_dia": 1, "fim_hora": "09:00",
+        "descricao": "Domingo 17:00 → Segunda 09:00"
+    },
+    "TGO": {
+        "nome": "Tango",
+        "armadores": "Hapag Lloyd - Maersk (slot Sealand)",
+        "cor": "primary",
+        "ativo": True,
+        "inicio_dia": 1, "inicio_hora": "11:00",
+        "fim_dia": 2, "fim_hora": "01:00",
+        "descricao": "Segunda 11:00 → Terça 01:00"
+    },
+    "NCS": {
+        "nome": "Norcoast",
+        "armadores": "Norcoast",
+        "cor": "info",
+        "ativo": True,
+        "inicio_dia": 2, "inicio_hora": "01:00",
+        "fim_dia": 2, "fim_hora": "19:00",
+        "descricao": "Terça 01:00 → Terça 19:00"
+    },
+    "S2S": {
+        "nome": "SEAS 2 (SB)",
+        "armadores": "CMA-CGM / Cosco - (Slot Evergreen, PIL e Yang Ming)",
+        "cor": "dark",
+        "ativo": True,
+        "inicio_dia": 2, "inicio_hora": "07:00",
+        "fim_dia": 3, "fim_hora": "19:00",
+        "descricao": "Terça 07:00 → Quarta 19:00"
+    },
+    "S2N": {
+        "nome": "SEAS 2 (NB)",
+        "armadores": "CMA-CGM / Cosco - (Slot Evergreen, PIL e Yang Ming)",
+        "cor": "dark",
+        "ativo": True,
+        "inicio_dia": 2, "inicio_hora": "17:00",
+        "fim_dia": 3, "fim_hora": "19:00",
+        "descricao": "Terça 17:00 → Quarta 19:00"
+    },
+    "SE1": {
+        "nome": "ESA / SEAS 1",
+        "armadores": "CMA CGM (SEAS) - Evergreen (ESA) - COSCO (ESA) - PIL (ES1) (Slot Yang Ming – SA3 - OOCL (TLA1))",
+        "cor": "success",
+        "ativo": True,
+        "inicio_dia": 3, "inicio_hora": "19:00",
+        "fim_dia": 4, "fim_hora": "19:00",
+        "descricao": "Quarta 19:00 → Quinta 19:00"
+    },
+    "QUI": {
+        "nome": "Químico / Chemical",
+        "armadores": "Chemical Tankers",
+        "cor": "secondary",
+        "ativo": True,
+        "inicio_dia": 4, "inicio_hora": "17:00",
+        "fim_dia": 5, "fim_hora": "21:00",
+        "descricao": "Quinta 17:00 → Sexta 21:00"
+    },
+    "FED": {
+        "nome": "Feeder (Log-In)",
+        "armadores": "Log-In (Slot Maersk / Aliança / CMA CGM / Mercosul / ZIM)",
+        "cor": "warning",
+        "ativo": True,
+        "inicio_dia": 5, "inicio_hora": "11:00",
+        "fim_dia": 5, "fim_hora": "23:00",
+        "descricao": "Sexta 11:00 → Sexta 23:00"
+    },
+    "COS": {
+        "nome": "CONOSUR",
+        "armadores": "Maersk - Sealand - Hapag Lloyd",
+        "cor": "info",
+        "ativo": True,
+        "inicio_dia": 5, "inicio_hora": "21:00",
+        "fim_dia": 6, "fim_hora": "19:00",
+        "descricao": "Sexta 21:00 → Sábado 19:00"
+    },
+    "BZX": {
+        "nome": "BRAZEx",
+        "armadores": "CMA CGM – Cosco (Slot Maersk – ONE)",
+        "cor": "danger",
+        "ativo": True,
+        "inicio_dia": 6, "inicio_hora": "13:00",
+        "fim_dia": 0, "fim_hora": "04:00",
+        "descricao": "Sábado 13:00 → Domingo 04:00"
     },
     "ZGT": {
         "nome": "ZIM Gulf Toucan",
         "armadores": "ZIM",
-        "cor": "success"
+        "cor": "success",
+        "ativo": False,
+        "inicio_dia": 0, "inicio_hora": "00:00",
+        "fim_dia": 0, "fim_hora": "00:00",
+        "descricao": "Janela não configurada"
     },
     "BBK": {
         "nome": "Break Bulk",
         "armadores": "G2 Ocean / BBC",
-        "cor": "secondary"
+        "cor": "secondary",
+        "ativo": False,
+        "inicio_dia": 0, "inicio_hora": "00:00",
+        "fim_dia": 0, "fim_hora": "00:00",
+        "descricao": "Janela não configurada"
     },
     "TRP": {
-        "nome": "Extra Call",
-        "armadores": "Extra Call",
-        "cor": "warning"
+        "nome": "Extra Call (Tramp)",
+        "armadores": "Extra Call / Tramp",
+        "cor": "warning",
+        "ativo": False,
+        "inicio_dia": 0, "inicio_hora": "00:00",
+        "fim_dia": 0, "fim_hora": "00:00",
+        "descricao": "Janela não configurada"
+    },
+    "GEN": {
+        "nome": "GENERIC",
+        "armadores": "Cargas Gerais / Diversos",
+        "cor": "secondary",
+        "ativo": False,
+        "inicio_dia": 0, "inicio_hora": "00:00",
+        "fim_dia": 0, "fim_hora": "00:00",
+        "descricao": "Janela não configurada"
     }
 }
 
-# Mapeamento das Janelas Oficiais (Proforma Windows) por dia da semana e horário
-# Domingo = 0, Segunda = 1, Terça = 2, Quarta = 3, Quinta = 4, Sexta = 5, Sábado = 6
-JANELAS_SERVICO = {
-    # BRACO: Domingo 07:00 até Segunda 01:00
-    "BCO": {
-        "inicio_dia": 0, "inicio_hora": 7, "inicio_min": 0,
-        "fim_dia": 1, "fim_hora": 1, "fim_min": 0,
-        "descricao": "Domingo 07:00 → Segunda 01:00"
-    },
-    # ZFS FALCON: Domingo 01:00 até Domingo 19:00
-    "ZFS": {
-        "inicio_dia": 0, "inicio_hora": 1, "inicio_min": 0,
-        "fim_dia": 0, "fim_hora": 19, "fim_min": 0,
-        "descricao": "Domingo 01:00 → Domingo 19:00"
-    },
-    # LUX / ESE 2: Domingo 17:00 até Segunda 09:00
-    "LUX": {
-        "inicio_dia": 0, "inicio_hora": 17, "inicio_min": 0,
-        "fim_dia": 1, "fim_hora": 9, "fim_min": 0,
-        "descricao": "Domingo 17:00 → Segunda 09:00"
-    },
-    # TANGO NB: Segunda 11:00 até Terça 01:00
-    "TGO": {
-        "inicio_dia": 1, "inicio_hora": 11, "inicio_min": 0,
-        "fim_dia": 2, "fim_hora": 1, "fim_min": 0,
-        "descricao": "Segunda 11:00 → Terça 01:00"
-    },
-    # NORCOAST: Terça 01:00 até Terça 19:00
-    "NCS": {
-        "inicio_dia": 2, "inicio_hora": 1, "inicio_min": 0,
-        "fim_dia": 2, "fim_hora": 19, "fim_min": 0,
-        "descricao": "Terça 01:00 → Terça 19:00"
-    },
-    # SEAS 2 SB (Southbound): Terça 07:00 até Quarta 19:00
-    "S2S": {
-        "inicio_dia": 2, "inicio_hora": 7, "inicio_min": 0,
-        "fim_dia": 3, "fim_hora": 19, "fim_min": 0,
-        "descricao": "Terça 07:00 → Quarta 19:00"
-    },
-    # SEAS 2 NB (Northbound): Terça 17:00 até Quarta 19:00
-    "S2N": {
-        "inicio_dia": 2, "inicio_hora": 17, "inicio_min": 0,
-        "fim_dia": 3, "fim_hora": 19, "fim_min": 0,
-        "descricao": "Terça 17:00 → Quarta 19:00"
-    },
-    # SEAS 1 / ESA 1: Quarta 19:00 até Quinta 19:00
-    "SE1": {
-        "inicio_dia": 3, "inicio_hora": 19, "inicio_min": 0,
-        "fim_dia": 4, "fim_hora": 19, "fim_min": 0,
-        "descricao": "Quarta 19:00 → Quinta 19:00"
-    },
-    # CHEMICAL: Quinta 17:00 até Sexta 21:00
-    "QUI": {
-        "inicio_dia": 4, "inicio_hora": 17, "inicio_min": 0,
-        "fim_dia": 5, "fim_hora": 21, "fim_min": 0,
-        "descricao": "Quinta 17:00 → Sexta 21:00"
-    },
-    # FEEDER SSR (Log-In): Sexta 11:00 até Sexta 23:00
-    "FED": {
-        "inicio_dia": 5, "inicio_hora": 11, "inicio_min": 0,
-        "fim_dia": 5, "fim_hora": 23, "fim_min": 0,
-        "descricao": "Sexta 11:00 → Sexta 23:00"
-    },
-    # CONOSUR: Sexta 21:00 até Sábado 19:00
-    "COS": {
-        "inicio_dia": 5, "inicio_hora": 21, "inicio_min": 0,
-        "fim_dia": 6, "fim_hora": 19, "fim_min": 0,
-        "descricao": "Sexta 21:00 → Sábado 19:00"
-    },
-    # BRAZEX: Sábado 13:00 até Domingo 04:00
-    "BZX": {
-        "inicio_dia": 6, "inicio_hora": 13, "inicio_min": 0,
-        "fim_dia": 0, "fim_hora": 4, "fim_min": 0,
-        "descricao": "Sábado 13:00 → Domingo 04:00"
-    }
-}
+
+def _montar_descricao(inicio_dia, inicio_hora, fim_dia, fim_hora):
+    """Gera o texto legível da janela semanal (ex: 'Domingo 07:00 → Segunda 01:00')."""
+    try:
+        d_ini = DIAS_SEMANA[int(inicio_dia)]
+        d_fim = DIAS_SEMANA[int(fim_dia)]
+        return f"{d_ini} {inicio_hora} → {d_fim} {fim_hora}"
+    except Exception:
+        return f"Dia {inicio_dia} {inicio_hora} → Dia {fim_dia} {fim_hora}"
+
+
+def carregar_janelas_config():
+    """
+    Carrega o dicionário de configurações de janelas a partir do arquivo JSON.
+    Se o arquivo não existir, inicializa com o padrão e salva.
+    Garante que todos os serviços essenciais existam no arquivo.
+    """
+    config = {}
+    precisa_salvar = False
+
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                config = json.load(f)
+        except Exception as e:
+            print(f"Erro ao ler {CONFIG_FILE}: {e}. Recriando padrão.")
+            config = {}
+
+    # Completa chaves que porventura faltem
+    for joint, padrao in DEFAULT_SERVICOS_MAP.items():
+        if joint not in config:
+            config[joint] = {
+                "joint": joint,
+                "nome": padrao["nome"],
+                "armadores": padrao["armadores"],
+                "cor": padrao["cor"],
+                "ativo": padrao["ativo"],
+                "inicio_dia": padrao["inicio_dia"],
+                "inicio_hora": padrao["inicio_hora"],
+                "fim_dia": padrao["fim_dia"],
+                "fim_hora": padrao["fim_hora"],
+                "descricao": padrao["descricao"],
+                "novo": False
+            }
+            precisa_salvar = True
+
+    if precisa_salvar or not os.path.exists(CONFIG_FILE):
+        salvar_janelas_config_arquivo(config)
+
+    return config
+
+
+def salvar_janelas_config_arquivo(config):
+    """Salva o dicionário de configuração em formato JSON no disco."""
+    try:
+        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump(config, f, indent=2, ensure_ascii=False)
+        return True
+    except Exception as e:
+        print(f"Erro ao salvar configurações de janelas em {CONFIG_FILE}: {e}")
+        return False
+
+
+def salvar_janelas_usuario(servicos_atualizados):
+    """
+    Atualiza as configurações das janelas recebidas do usuário (via modal).
+    O usuário pode alterar: ativo, inicio_dia, inicio_hora, fim_dia, fim_hora.
+    Nomes de serviços e armadores são mantidos intactos para evitar erros de digitação.
+    """
+    config_atual = carregar_janelas_config()
+
+    for item in servicos_atualizados:
+        joint = (item.get("joint") or "").strip().upper()
+        if not joint:
+            continue
+
+        if joint not in config_atual:
+            # Caso não exista previamente, cria com dados informados
+            config_atual[joint] = {
+                "joint": joint,
+                "nome": item.get("nome", joint),
+                "armadores": item.get("armadores", "Não especificado"),
+                "cor": item.get("cor", "info"),
+                "ativo": bool(item.get("ativo", False)),
+                "inicio_dia": int(item.get("inicio_dia", 0)),
+                "inicio_hora": item.get("inicio_hora", "00:00"),
+                "fim_dia": int(item.get("fim_dia", 0)),
+                "fim_hora": item.get("fim_hora", "00:00"),
+                "novo": False
+            }
+        else:
+            # Atualiza apenas os parâmetros operacionais de tempo e ativação
+            config_atual[joint]["ativo"] = bool(item.get("ativo", False))
+            config_atual[joint]["inicio_dia"] = int(item.get("inicio_dia", 0))
+            config_atual[joint]["inicio_hora"] = item.get("inicio_hora", "00:00")
+            config_atual[joint]["fim_dia"] = int(item.get("fim_dia", 0))
+            config_atual[joint]["fim_hora"] = item.get("fim_hora", "00:00")
+            # Ao ser salvo pelo usuário, o status de "novo" é removido
+            config_atual[joint]["novo"] = False
+
+        # Atualiza a descrição textual legível
+        if config_atual[joint]["ativo"]:
+            config_atual[joint]["descricao"] = _montar_descricao(
+                config_atual[joint]["inicio_dia"],
+                config_atual[joint]["inicio_hora"],
+                config_atual[joint]["fim_dia"],
+                config_atual[joint]["fim_hora"]
+            )
+        else:
+            config_atual[joint]["descricao"] = "Janela inativa"
+
+    salvar_janelas_config_arquivo(config_atual)
+    return config_atual
+
+
+def sincronizar_servicos_com_api(todos_lineup):
+    """
+    Varre a lista de navios retornada pela API do Rio Brasil Terminal.
+    Se encontrar qualquer 'joint' que ainda não esteja no arquivo de configuração,
+    adiciona-o automaticamente com os nomes e operadoras extraídos da própria API.
+    Assim, novos serviços ficam prontos para o usuário definir apenas dia e hora.
+    """
+    config = carregar_janelas_config()
+    novos_detectados = False
+
+    for item in todos_lineup:
+        joint = (item.get("joint") or "").strip().upper()
+        if not joint:
+            continue
+
+        if joint not in config:
+            service_name = (item.get("serviceName") or "").strip()
+            operator = (item.get("operator") or "").strip()
+
+            nome_final = service_name if service_name else joint
+            armador_final = operator if operator else "Extraído da API"
+
+            # Auto-adiciona o serviço detectado na API
+            config[joint] = {
+                "joint": joint,
+                "nome": nome_final,
+                "armadores": armador_final,
+                "cor": "info",
+                "ativo": False, # Aguarda configuração do usuário
+                "inicio_dia": 0,
+                "inicio_hora": "00:00",
+                "fim_dia": 0,
+                "fim_hora": "00:00",
+                "descricao": "Novo serviço detectado na API (aguardando horários)",
+                "novo": True # Destaca visualmente na interface
+            }
+            novos_detectados = True
+            print(f"[Lineup Auto-Sync] Novo serviço marítimo detectado na API: {joint} ({nome_final})")
+
+    if novos_detectados:
+        salvar_janelas_config_arquivo(config)
+
+    return config
 
 
 def verificar_status_janela(joint, dt, manobra):
     """
-    Avalia se a manobra de Entrada ('E') está dentro ou fora da janela semanal de atracação.
+    Avalia se a manobra de Entrada ('E') está dentro ou fora da janela semanal de atracação
+    de acordo com as configurações ativas no arquivo de persistência.
     Retorna (status, descricao, texto_tooltip).
     """
-    info = JANELAS_SERVICO.get(joint)
-    if not info or not dt:
+    if not joint or not dt:
         return None, None, None
 
-    # O foco na janela de atracação é na manobra de Entrada (E)
+    config = carregar_janelas_config()
+    info = config.get(joint)
+
+    if not info or not info.get("ativo", False):
+        return None, None, None
+
+    desc = info.get("descricao") or _montar_descricao(
+        info.get("inicio_dia", 0),
+        info.get("inicio_hora", "00:00"),
+        info.get("fim_dia", 0),
+        info.get("fim_hora", "00:00")
+    )
+
+    # O foco da janela oficial de atracação é na manobra de Entrada (E)
     if manobra != "E":
-        return None, info["descricao"], f"Janela Oficial: {info['descricao']}"
+        return None, desc, f"Janela Oficial: {desc}"
 
-    # Domingo = 0, Segunda = 1, ..., Sábado = 6
-    dia_semana_domingo_0 = (dt.weekday() + 1) % 7
-    minutos_navio = dia_semana_domingo_0 * 1440 + dt.hour * 60 + dt.minute
+    try:
+        # Extrai horas e minutos de início e fim
+        h_ini, m_ini = map(int, str(info.get("inicio_hora", "00:00")).split(":"))
+        h_fim, m_fim = map(int, str(info.get("fim_hora", "00:00")).split(":"))
 
-    inicio_min = info["inicio_dia"] * 1440 + info["inicio_hora"] * 60 + info["inicio_min"]
-    fim_min = info["fim_dia"] * 1440 + info["fim_hora"] * 60 + info["fim_min"]
+        # Domingo = 0, Segunda = 1, ..., Sábado = 6
+        dia_semana_domingo_0 = (dt.weekday() + 1) % 7
+        minutos_navio = dia_semana_domingo_0 * 1440 + dt.hour * 60 + dt.minute
 
-    # Verifica intervalo
-    if inicio_min <= fim_min:
-        na_janela = (inicio_min <= minutos_navio <= fim_min)
-    else:
-        # Vira a semana (ex: Sábado para Domingo)
-        na_janela = (minutos_navio >= inicio_min or minutos_navio <= fim_min)
+        inicio_min = int(info.get("inicio_dia", 0)) * 1440 + h_ini * 60 + m_ini
+        fim_min = int(info.get("fim_dia", 0)) * 1440 + h_fim * 60 + m_fim
 
-    desc = info["descricao"]
-    if na_janela:
-        return "NA_JANELA", desc, f"Dentro da Janela Oficial ({desc})"
-    else:
-        return "FORA_DA_JANELA", desc, f"Fora da Janela Oficial (Programado: {desc})"
+        # Avaliação de intervalo dentro da mesma semana ou virando a semana
+        if inicio_min <= fim_min:
+            na_janela = (inicio_min <= minutos_navio <= fim_min)
+        else:
+            # Vira a semana (ex: Sábado para Domingo)
+            na_janela = (minutos_navio >= inicio_min or minutos_navio <= fim_min)
+
+        if na_janela:
+            return "NA_JANELA", desc, f"Dentro da Janela Oficial ({desc})"
+        else:
+            return "FORA_DA_JANELA", desc, f"Fora da Janela Oficial (Programado: {desc})"
+
+    except Exception as e:
+        print(f"Erro ao verificar janela para {joint}: {e}")
+        return None, desc, f"Janela Oficial: {desc}"
 
 
 def obter_lineup_rio_brasil():
     """
-    Chama a API do Rio Brasil Terminal e retorna um dicionário com os navios
-    e seus respectivos serviços.
+    Chama a API do Rio Brasil Terminal, sincroniza serviços automaticamente
+    e retorna um dicionário com os navios e seus respectivos serviços.
     """
     try:
         now = datetime.now(timezone.utc)
@@ -227,6 +420,10 @@ def obter_lineup_rio_brasil():
             return {}
 
         todos = resp_obj[0].get("todos", [])
+
+        # Sincroniza novos serviços detectados na API com o arquivo de configuração
+        config_servicos = sincronizar_servicos_com_api(todos)
+
         lineup_map = {}
 
         for item in todos:
@@ -239,18 +436,17 @@ def obter_lineup_rio_brasil():
             viagem = (item.get("viagem") or "").strip()
             operator = (item.get("operator") or "").strip()
 
-            # Mapeia informações do serviço
-            info_cadastrada = SERVICOS_MAP.get(joint)
+            # Obtém dados da configuração persistente ou usa fallback inteligente
+            info_cadastrada = config_servicos.get(joint)
             if info_cadastrada:
                 nome_exibicao = info_cadastrada["nome"]
                 armadores_exibicao = info_cadastrada["armadores"]
-                cor_badge = info_cadastrada["cor"]
+                cor_badge = info_cadastrada.get("cor", "secondary")
             else:
                 nome_exibicao = service_name if service_name else (joint if joint else "Outro")
                 armadores_exibicao = operator if operator else "Não especificado"
                 cor_badge = "secondary"
 
-            # Salva na lista do navio
             if navio_nome not in lineup_map:
                 lineup_map[navio_nome] = []
 
@@ -279,7 +475,7 @@ def enriquecer_navio_com_servico(navio_dict, lineup_map):
     terminal = navio_dict.get("terminal")
     navio_nome = (navio_dict.get("navio") or "").strip().upper()
 
-    # Aplica somente para navios do terminal rio brasil
+    # Aplica para navios do terminal rio brasil
     if terminal == "rio" and navio_nome in lineup_map:
         lista_viagens = lineup_map[navio_nome]
         viagem_info = lista_viagens[0]

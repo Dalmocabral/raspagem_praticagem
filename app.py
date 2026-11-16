@@ -31,7 +31,13 @@ from datetime import datetime, timedelta
 import re
 import os
 from pytz import timezone
-from lineup_service import obter_lineup_rio_brasil, enriquecer_navio_com_servico
+from lineup_service import (
+    obter_lineup_rio_brasil,
+    enriquecer_navio_com_servico,
+    carregar_janelas_config,
+    salvar_janelas_usuario,
+    DIAS_SEMANA
+)
 
 # Define a porta do servidor. Tenta obter da variável de ambiente 'PORT', caso contrário, usa 5000 como padrão.
 port = int(os.environ.get("PORT", 5000))
@@ -439,6 +445,45 @@ def api_navios():
         "ultima_atualizacao": ultima_atualizacao,
         "barra_info": barra_info,
         "conflitos": conflitos_encontrados,
+    })
+
+
+# Rota para obter as configurações das janelas de atracação dos serviços
+@app.route("/api/config/janelas", methods=["GET"])
+def api_get_config_janelas():
+    config = carregar_janelas_config()
+    lista_servicos = list(config.values())
+    
+    # Ordena: Novos primeiro, depois ativos, depois por nome
+    lista_servicos.sort(key=lambda x: (not x.get("novo", False), not x.get("ativo", False), x.get("nome", "")))
+    
+    total_novos = sum(1 for s in lista_servicos if s.get("novo", False))
+    dias = [{"id": i, "nome": nome} for i, nome in enumerate(DIAS_SEMANA)]
+    
+    return jsonify({
+        "sucesso": True,
+        "servicos": lista_servicos,
+        "dias_semana": dias,
+        "total_novos": total_novos
+    })
+
+
+# Rota para salvar alterações nas janelas de atracação
+@app.route("/api/config/janelas", methods=["POST"])
+def api_save_config_janelas():
+    dados = request.get_json() or {}
+    servicos = dados.get("servicos", [])
+    if not isinstance(servicos, list):
+        return jsonify({"sucesso": False, "mensagem": "Formato de dados inválido."}), 400
+
+    salvar_janelas_usuario(servicos)
+    
+    # Invalida o cache para recálculo imediato das janelas
+    cache.clear()
+
+    return jsonify({
+        "sucesso": True,
+        "mensagem": "Configurações de janelas salvas com sucesso!"
     })
 
 
