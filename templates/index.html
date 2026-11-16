@@ -691,6 +691,12 @@
       overflow: hidden;
       color: var(--text-primary);
     }
+    #configJanelasModal .modal-body {
+      overflow-x: hidden !important;
+      overflow-y: auto;
+      padding-top: 6px;
+      padding-bottom: 12px;
+    }
     .apple-btn-close {
       filter: var(--bs-btn-close-filter);
       opacity: 0.7;
@@ -749,6 +755,8 @@
       border: 1px solid var(--border-color);
       border-radius: 12px;
       overflow: hidden;
+      display: flex;
+      align-items: center;
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
     .apple-input-group:focus-within {
@@ -759,20 +767,35 @@
       font-size: 11.5px;
       font-weight: 600;
       color: var(--text-secondary);
-      background: transparent;
-      padding: 4px 10px;
+      background: rgba(0, 0, 0, 0.03);
+      padding: 6px 10px;
+      border: none;
+      border-right: 1px solid var(--border-subtle);
     }
-    .apple-input-group .form-select,
+    [data-bs-theme="dark"] .apple-input-group .input-group-text {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .apple-input-group .form-select {
+      font-size: 12.5px;
+      background: transparent;
+      color: var(--text-primary);
+      box-shadow: none;
+      padding: 6px 8px;
+      border: none;
+      border-right: 1px solid var(--border-subtle);
+      cursor: pointer;
+    }
+    .apple-input-group .form-select option {
+      background: var(--card-bg);
+      color: var(--text-primary);
+    }
     .apple-input-group .form-control {
       font-size: 12.5px;
       background: transparent;
       color: var(--text-primary);
       box-shadow: none;
-      padding: 4px 8px;
-    }
-    .apple-input-group .form-select option {
-      background: var(--card-bg);
-      color: var(--text-primary);
+      padding: 6px 8px;
+      border: none;
     }
 
     /* Save Button */
@@ -802,14 +825,20 @@
 
     /* Preview Pill */
     .preview-pill {
-      font-size: 11px;
+      font-size: 11.5px;
       font-weight: 500;
-      border-radius: 8px;
-      padding: 4px 8px;
+      border-radius: 999px;
+      padding: 3px 10px;
       background: var(--apple-blue-tint);
       color: var(--apple-blue);
       border: 1px solid var(--apple-blue-border);
       white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    .preview-pill.inativo {
+      background: rgba(142, 142, 147, 0.1);
+      color: var(--text-secondary);
+      border-color: rgba(142, 142, 147, 0.25);
     }
 
     /* ============================================================
@@ -983,7 +1012,7 @@
       
       <!-- Right Controls: Settings and Theme Toggle -->
       <div class="d-flex align-items-center gap-2">
-        <button id="config-btn" class="btn btn-sm apple-btn-control position-relative" title="Configurar Janelas dos Serviços" data-bs-toggle="modal" data-bs-target="#configJanelasModal">
+        <button id="config-btn" class="btn btn-sm apple-btn-control position-relative" title="Configuração de Serviços" data-bs-toggle="modal" data-bs-target="#configJanelasModal">
           <span class="material-icons" style="font-size: 18px; vertical-align: middle;">settings</span>
           <span id="config-new-badge" class="badge-dot-notification" style="display: none;" title="Novo serviço detectado na API!"></span>
         </button>
@@ -1118,17 +1147,14 @@
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
       <div class="modal-content apple-modal">
         <!-- Header -->
-        <div class="modal-header border-0 pb-1 pt-3 px-3">
+        <div class="modal-header border-0 pb-2 pt-3 px-3">
           <div class="d-flex align-items-center gap-2">
             <div class="apple-logo-badge" style="width: 36px; height: 36px; margin: 0;">
               <span class="material-icons" style="font-size: 20px; color: var(--apple-blue);">settings</span>
             </div>
-            <div>
-              <h5 class="modal-title fw-bold m-0" id="configJanelasModalLabel" style="font-size: 1.15rem; letter-spacing: -0.01em;">
-                Janelas Oficiais de Atracação
-              </h5>
-              <p class="text-secondary small mb-0">Serviços extraídos da API. Defina os dias da semana e horários da janela operacional.</p>
-            </div>
+            <h5 class="modal-title fw-bold m-0" id="configJanelasModalLabel" style="font-size: 1.18rem; letter-spacing: -0.01em;">
+              Configuração de Serviços
+            </h5>
           </div>
           <button type="button" class="btn-close apple-btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
@@ -1636,6 +1662,7 @@
 
           return `
             <div class="service-config-card p-3 rounded-4 ${isNovo ? 'is-novo' : ''}" data-joint="${s.joint}">
+              <!-- Linha 1: Identificação, Status e Chave Ativo -->
               <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                   <span class="badge-apple badge-servico ${s.cor || 'secondary'}">${s.nome}</span>
@@ -1643,44 +1670,41 @@
                   ${isNovo ? `<span class="badge bg-warning text-dark pill-novo-servico"><span class="material-icons" style="font-size: 12px; vertical-align: -1px;">auto_awesome</span> Novo da API</span>` : ''}
                 </div>
                 
-                <div class="form-check form-switch m-0 d-flex align-items-center gap-2">
-                  <input class="form-check-input switch-ativo" type="checkbox" role="switch" id="switch-${s.joint}" ${isAtivo ? 'checked' : ''} onchange="atualizarEstadoServico('${s.joint}')">
-                  <label class="form-check-label small fw-semibold text-secondary" for="switch-${s.joint}">Ativo</label>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <span class="preview-pill ${isAtivo ? '' : 'inativo'}" id="preview-${s.joint}">${previewText}</span>
+                  <div class="form-check form-switch m-0 d-flex align-items-center gap-1 ms-1">
+                    <input class="form-check-input switch-ativo" type="checkbox" role="switch" id="switch-${s.joint}" ${isAtivo ? 'checked' : ''} onchange="atualizarEstadoServico('${s.joint}')">
+                    <label class="form-check-label small fw-semibold text-secondary" for="switch-${s.joint}">Ativo</label>
+                  </div>
                 </div>
               </div>
               
-              <div class="text-secondary small mb-3 text-truncate" title="${s.armadores || ''}">
+              <!-- Linha 2: Armadores -->
+              <div class="text-secondary small mb-2 text-truncate" title="${s.armadores || ''}">
                 <span class="material-icons" style="font-size: 13px; vertical-align: -2px;">directions_boat</span>
                 ${s.armadores || 'Armadores não especificados'}
               </div>
 
+              <!-- Linha 3: Controles de Início e Fim (2 colunas equilibradas) -->
               <div class="row g-2 align-items-center time-controls-row ${isAtivo ? '' : 'time-controls-disabled'}" id="controls-${s.joint}">
-                <div class="col-12 col-md-5">
+                <div class="col-12 col-sm-6">
                   <div class="input-group input-group-sm apple-input-group">
-                    <span class="input-group-text border-end-0">Início</span>
-                    <select class="form-select select-inicio-dia border-start-0 border-end-0" ${isAtivo ? '' : 'disabled'} onchange="atualizarPreviewLinha('${s.joint}')">
+                    <span class="input-group-text">Início</span>
+                    <select class="form-select select-inicio-dia" ${isAtivo ? '' : 'disabled'} onchange="atualizarPreviewLinha('${s.joint}')">
                       ${gerarOptionsDias(s.inicio_dia)}
                     </select>
                     <input type="time" class="form-control input-inicio-hora" value="${s.inicio_hora || '00:00'}" ${isAtivo ? '' : 'disabled'} onchange="atualizarPreviewLinha('${s.joint}')">
                   </div>
                 </div>
 
-                <div class="col-12 col-md-1 text-center d-none d-md-block text-secondary">
-                  <span class="material-icons" style="font-size: 16px; opacity: 0.5;">arrow_forward</span>
-                </div>
-
-                <div class="col-12 col-md-5">
+                <div class="col-12 col-sm-6">
                   <div class="input-group input-group-sm apple-input-group">
-                    <span class="input-group-text border-end-0">Fim</span>
-                    <select class="form-select select-fim-dia border-start-0 border-end-0" ${isAtivo ? '' : 'disabled'} onchange="atualizarPreviewLinha('${s.joint}')">
+                    <span class="input-group-text">Fim</span>
+                    <select class="form-select select-fim-dia" ${isAtivo ? '' : 'disabled'} onchange="atualizarPreviewLinha('${s.joint}')">
                       ${gerarOptionsDias(s.fim_dia)}
                     </select>
                     <input type="time" class="form-control input-fim-hora" value="${s.fim_hora || '00:00'}" ${isAtivo ? '' : 'disabled'} onchange="atualizarPreviewLinha('${s.joint}')">
                   </div>
-                </div>
-
-                <div class="col-12 col-md-1 text-md-end text-start mt-1 mt-md-0">
-                  <span class="preview-pill" id="preview-${s.joint}">${previewText}</span>
                 </div>
               </div>
             </div>
@@ -1704,11 +1728,15 @@
       if (switchEl.checked) {
         controls.classList.remove('time-controls-disabled');
         inputs.forEach(el => el.disabled = false);
+        if (previewEl) previewEl.classList.remove('inativo');
         atualizarPreviewLinha(joint);
       } else {
         controls.classList.add('time-controls-disabled');
         inputs.forEach(el => el.disabled = true);
-        if (previewEl) previewEl.innerText = 'Janela inativa';
+        if (previewEl) {
+          previewEl.classList.add('inativo');
+          previewEl.innerText = 'Janela inativa';
+        }
       }
     }
 
@@ -1721,10 +1749,12 @@
       if (!previewEl) return;
 
       if (!switchEl.checked) {
+        previewEl.classList.add('inativo');
         previewEl.innerText = 'Janela inativa';
         return;
       }
 
+      previewEl.classList.remove('inativo');
       const iniDia = card.querySelector('.select-inicio-dia').value;
       const iniHora = card.querySelector('.input-inicio-hora').value || "00:00";
       const fimDia = card.querySelector('.select-fim-dia').value;
